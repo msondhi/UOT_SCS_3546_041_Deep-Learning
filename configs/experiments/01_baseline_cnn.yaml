@@ -1,0 +1,13 @@
+# E1 - Baseline: small CNN trained from scratch (no pretrained knowledge).
+base: ../base.yaml
+experiment_name: 01_baseline_cnn
+
+model:
+  name: simple_cnn
+  pretrained: false
+
+train:
+  epochs: 10
+  lr: 1.0e-3
+  backbone_lr_mult: 1.0
+  early_stopping_patience: 3

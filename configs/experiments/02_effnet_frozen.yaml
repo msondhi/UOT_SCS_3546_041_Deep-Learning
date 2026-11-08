@@ -1,0 +1,7 @@
+# E2 - Transfer learning, frozen backbone: only the new classifier head is trained.
+base: ../base.yaml
+experiment_name: 02_effnet_frozen
+
+train:
+  lr: 1.0e-3
+  freeze_backbone_epochs: 999

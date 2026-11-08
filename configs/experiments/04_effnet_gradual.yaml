@@ -1,0 +1,7 @@
+# E4 - Transfer learning, gradual unfreezing: head only for 1 epoch, then the whole network.
+base: ../base.yaml
+experiment_name: 04_effnet_gradual
+
+train:
+  freeze_backbone_epochs: 1
+  warmup_epochs: 0

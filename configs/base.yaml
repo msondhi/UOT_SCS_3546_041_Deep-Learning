@@ -1,0 +1,34 @@
+# Shared defaults. Experiment files in configs/experiments/ start with `base: ../base.yaml`
+# and only list what they change.
+
+experiment_name: base
+seed: 42
+output_dir: outputs
+
+data:
+  root: data/raw/real_vs_fake/real-vs-fake   # contains train/ valid/ test/, each with real/ and fake/
+  image_size: 224
+  batch_size: 64
+  num_workers: 4
+  train_subset: null    # e.g. 10000 for quick runs; null = use everything
+  val_subset: null
+  test_subset: null
+
+augment:
+  standard: true        # random crop, horizontal flip, colour jitter
+  degradation: false    # add random JPEG/blur/downscale/noise/screen effects during training
+  degradation_prob: 0.5
+
+model:
+  name: efficientnet_b0 # simple_cnn, or any timm model: efficientnet_b0, resnet50, vit_small_patch16_224
+  pretrained: true      # start from ImageNet weights
+  dropout: 0.2
+
+train:
+  epochs: 5
+  lr: 3.0e-4            # learning rate for the classifier head
+  backbone_lr_mult: 0.1 # backbone learns 10x slower than the head
+  weight_decay: 1.0e-4
+  warmup_epochs: 1
+  freeze_backbone_epochs: 0   # 0 = train everything from the start; >= epochs = backbone frozen throughout
+  early_stopping_patience: 2

@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "deepfake-kyc"
+version = "0.1.0"
+description = "Detecting AI-generated faces in KYC identity verification (UofT deep learning final project)"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "torch>=2.2",
+    "torchvision>=0.17",
+    "timm>=0.9",
+    "numpy>=1.24",
+    "pillow>=10.0",
+    "scikit-learn>=1.3",
+    "pyyaml>=6.0",
+    "tqdm>=4.66",
+    "matplotlib>=3.8",
+    "grad-cam>=1.5",
+]
+
+[project.optional-dependencies]
+demo = ["gradio>=4.0"]
+dev = ["pytest>=8.0", "ruff>=0.4"]
+
+[project.scripts]
+dfk-train = "deepfake_kyc.train:main"
+dfk-evaluate = "deepfake_kyc.evaluate:main"
+dfk-explain = "deepfake_kyc.explain:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]

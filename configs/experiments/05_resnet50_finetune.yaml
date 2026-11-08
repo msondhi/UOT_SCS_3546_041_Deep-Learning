@@ -1,0 +1,9 @@
+# E5 - Architecture comparison: ResNet-50 with full fine-tuning (compare with E3).
+base: ../base.yaml
+experiment_name: 05_resnet50_finetune
+
+model:
+  name: resnet50
+
+data:
+  batch_size: 32

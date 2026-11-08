@@ -1,0 +1,7 @@
+# E6 - Robust training: same as E3 plus degradation-aware augmentation.
+base: ../base.yaml
+experiment_name: 06_effnet_robust
+
+augment:
+  degradation: true
+  degradation_prob: 0.5

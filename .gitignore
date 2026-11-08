@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Data and results (never commit datasets or model weights)
+data/
+outputs/
+*.pt
+*.pth
+
+# Secrets
+kaggle.json
+access_token
+.env
+
+# Notebooks / OS / editors
+.ipynb_checkpoints/
+.DS_Store
+.vscode/
+.idea/
