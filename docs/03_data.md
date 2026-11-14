@@ -34,8 +34,8 @@ in a fresh checkout. Images are still git-ignored and must be added on every mac
 1. `make data` (or `bash scripts/download_data.sh`) downloads and unzips from Kaggle using an API token.
 2. Download the zip from the Kaggle page with your browser and unzip it into `data/raw/`; the zip already contains
    the `real_vs_fake/real-vs-fake/...` folders.
-3. Open `notebooks/01_explore_data.ipynb` and use Step 2: type the path of the zip or folder and click **Open path**,
-   or click **Upload zip** for a small zip. The notebook extracts into `data/raw/` for you.
+3. Open `notebooks/01_explore_data.ipynb` and use Step 2: copy the zip into `data/raw/` (or, on Colab, upload it
+   or copy it from Google Drive), then run Step 2b, which unpacks it into `data/raw/` for you.
 
 ## Labels
 | Folder | Label | Meaning |

@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Notebook Data Flow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* layout: one column — intro, the big folder/notebook diagram, then run order, folder table and Colab notes */
+:root{
+  --bg:#f3f4f6;
+  --surface:#ffffff;
+  --border:#d7dae0;
+  --fg:#1b2430;
+  --muted-fg:#5b6472;
+  --accent:#2f6f6b;
+  --accent-fill:#dcebe9;
+  --read:#5b6472;
+  --warn:#9a5a16;
+  --warn-fill:#f6e7cf;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#11151c;
+    --surface:#1a2029;
+    --border:#2b333f;
+    --fg:#e7eaf0;
+    --muted-fg:#9aa5b4;
+    --accent:#5fd1c9;
+    --accent-fill:#1d3533;
+    --read:#9aa5b4;
+    --warn:#e2a24d;
+    --warn-fill:#3a2f1c;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11151c;
+  --surface:#1a2029;
+  --border:#2b333f;
+  --fg:#e7eaf0;
+  --muted-fg:#9aa5b4;
+  --accent:#5fd1c9;
+  --accent-fill:#1d3533;
+  --read:#9aa5b4;
+  --warn:#e2a24d;
+  --warn-fill:#3a2f1c;
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--fg);
+  font-family:'Inter',system-ui,sans-serif;
+  font-size:15px;
+  line-height:1.55;
+  padding:32px max(16px, env(safe-area-inset-right,0px)) 32px max(16px, env(safe-area-inset-left,0px));
+}
+main{max-width:960px;margin:0 auto}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted-fg);letter-spacing:.02em}
+h1{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(26px,4.5vw,34px);margin:.3em 0 .2em;text-wrap:balance}
+p.lede{color:var(--muted-fg);max-width:68ch;margin:0 0 1.6em}
+h2{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:19px;margin:2.4em 0 .3em;text-wrap:balance}
+p,li{max-width:72ch}
+.note{color:var(--muted-fg);font-size:14px}
+figure{margin:0}
+figure.diagram{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;overflow-x:auto}
+figure.diagram svg{display:block;width:100%;height:auto;min-width:720px}
+figcaption{color:var(--muted-fg);font-size:13px;margin-top:.6em;max-width:76ch}
+code{font-family:'JetBrains Mono',monospace;font-size:.9em}
+.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12.5px;color:var(--muted-fg);margin-top:10px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.swatch{width:22px;height:0;border-top:2px solid var(--accent);display:inline-block}
+.swatch.read{border-top:2px dashed var(--read)}
+.box{width:12px;height:12px;border-radius:3px;display:inline-block;background:var(--accent-fill);border:1px solid var(--accent)}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:.6em;min-width:600px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+th{font-family:'Space Grotesk',sans-serif;font-weight:500;color:var(--muted-fg);font-size:12px;letter-spacing:.03em;text-transform:uppercase}
+ol.steps{padding-left:1.3em}
+ol.steps li{margin:.35em 0}
+.callout{background:var(--warn-fill);border-left:3px solid var(--warn);border-radius:6px;padding:12px 16px;margin:1em 0;font-size:14px}
+.callout strong{color:var(--warn)}
+footer{margin-top:2.6em;padding-top:1.2em;border-top:1px solid var(--border);color:var(--muted-fg);font-size:12.5px;max-width:76ch}
+
+/* svg */
+svg text{font-family:'Inter',system-ui,sans-serif;fill:var(--fg)}
+svg .mono{font-family:'JetBrains Mono',monospace}
+svg .muted{fill:var(--muted-fg)}
+svg .title{font-family:'Space Grotesk',sans-serif;font-weight:700}
+svg .band{fill:var(--accent-fill);stroke:var(--accent);stroke-width:1.2}
+svg .proc{fill:var(--surface);stroke:var(--border);stroke-width:1.2}
+svg .chip{fill:var(--surface);stroke:var(--accent);stroke-width:1}
+svg .write{stroke:var(--accent);stroke-width:2;fill:none}
+svg .read{stroke:var(--read);stroke-width:1.6;stroke-dasharray:5 4;fill:none}
+svg .lbl{font-size:11px;fill:var(--muted-fg)}
+svg .lane{font-size:11px;fill:var(--muted-fg);letter-spacing:.06em}
+</style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">notebooks/ · data/raw/ · outputs/</div>
+  <h1>How the notebooks share their results</h1>
+  <p class="lede">The notebooks never call each other and never pass Python variables between them. Each one is a separate
+  program. They “talk” only through <strong>folders on disk</strong>: one notebook or script saves files into a folder with an
+  agreed name, and a later notebook opens that same folder and reads them.</p>
+
+  <h2>1. The big picture</h2>
+  <p class="note">Top band: the image folder. Middle row: notebooks and scripts, run left to right. Bottom band: the results folder.
+  Solid arrows save files, dashed arrows only read them.</p>
+  <figure class="diagram">
+    <svg viewBox="0 0 940 500" role="img" aria-label="Data flow. Notebook 01 unpacks the Kaggle zip into the data folder and counts images. Notebook 02, notebook 05 or train.py, evaluate.py and notebook 04 read images from the data folder. Notebook 05 or train.py saves best.pt, config.yaml, history.csv and summary.json into outputs/experiment. evaluate.py reads best.pt and saves eval csv files there. Notebook 03 reads the eval csv files. Notebook 04 reads best.pt.">
+      <defs>
+        <marker id="aw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"/>
+        </marker>
+        <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="var(--read)"/>
+        </marker>
+      </defs>
+
+      <!-- data band -->
+      <rect class="band" x="10" y="14" width="920" height="100" rx="10"/>
+      <text class="lane" x="26" y="36">FOLDER 1 · THE IMAGES</text>
+      <text class="mono title" x="26" y="62" font-size="16">data/raw/real_vs_fake/real-vs-fake/</text>
+      <text class="mono" x="26" y="86" font-size="12.5">train/  valid/  test/   →  each has  real/*.jpg  and  fake/*.jpg</text>
+      <text class="muted" x="26" y="104" font-size="12">You put Kaggle’s archive.zip in data/raw/ · notebook 01 Step 2b unpacks it here · never saved to git</text>
+
+      <!-- process row -->
+      <g>
+        <rect class="proc" x="10"  y="192" width="145" height="74" rx="8"/>
+        <text class="mono" x="82.5" y="222" font-size="12.5" text-anchor="middle" font-weight="500">01_explore_data</text>
+        <text class="muted" x="82.5" y="242" font-size="11.5" text-anchor="middle">notebook · look at data</text>
+
+        <rect class="proc" x="165" y="192" width="145" height="74" rx="8"/>
+        <text class="mono" x="237.5" y="222" font-size="12.5" text-anchor="middle" font-weight="500">02_degradations</text>
+        <text class="muted" x="237.5" y="242" font-size="11.5" text-anchor="middle">notebook · see damage</text>
+
+        <rect class="proc" x="320" y="192" width="145" height="74" rx="8"/>
+        <text class="mono" x="392.5" y="218" font-size="12.5" text-anchor="middle" font-weight="500">05 / train.py</text>
+        <text class="muted" x="392.5" y="238" font-size="11.5" text-anchor="middle">trains a model</text>
+        <text class="muted" x="392.5" y="254" font-size="11" text-anchor="middle">GPU recommended</text>
+
+        <rect class="proc" x="475" y="192" width="145" height="74" rx="8"/>
+        <text class="mono" x="547.5" y="218" font-size="12.5" text-anchor="middle" font-weight="500">evaluate.py</text>
+        <text class="muted" x="547.5" y="238" font-size="11.5" text-anchor="middle">scores on test set</text>
+        <text class="muted" x="547.5" y="254" font-size="11" text-anchor="middle">(or 05’s last cell)</text>
+
+        <rect class="proc" x="630" y="192" width="145" height="74" rx="8"/>
+        <text class="mono" x="702.5" y="222" font-size="12.5" text-anchor="middle" font-weight="500">03_results_charts</text>
+        <text class="muted" x="702.5" y="242" font-size="11.5" text-anchor="middle">notebook · charts</text>
+
+        <rect class="proc" x="785" y="192" width="145" height="74" rx="8"/>
+        <text class="mono" x="857.5" y="222" font-size="12.5" text-anchor="middle" font-weight="500">04_error_analysis</text>
+        <text class="muted" x="857.5" y="242" font-size="11.5" text-anchor="middle">notebook · mistakes</text>
+      </g>
+
+      <!-- arrows: data band <-> processes -->
+      <line class="write" x1="50"  y1="190" x2="50"  y2="118" marker-end="url(#aw)"/>
+      <line class="read" x1="115" y1="118" x2="115" y2="188" marker-end="url(#ar)"/>
+      <text class="lbl" x="123" y="148">unpacks zip,</text>
+      <text class="lbl" x="123" y="163">counts</text>
+
+      <line class="read" x1="237.5" y1="118" x2="237.5" y2="188" marker-end="url(#ar)"/>
+      <text class="lbl" x="245" y="158">reads 1 face</text>
+
+      <line class="read" x1="392.5" y1="118" x2="392.5" y2="188" marker-end="url(#ar)"/>
+      <text class="lbl" x="400" y="158">reads train + valid</text>
+
+      <line class="read" x1="547.5" y1="118" x2="547.5" y2="188" marker-end="url(#ar)"/>
+      <text class="lbl" x="555" y="158">reads test</text>
+
+      <line class="read" x1="857.5" y1="118" x2="857.5" y2="188" marker-end="url(#ar)"/>
+      <text class="lbl" x="865" y="158">reads test</text>
+
+      <!-- results band -->
+      <rect class="band" x="320" y="340" width="610" height="146" rx="10"/>
+      <text class="lane" x="336" y="362">FOLDER 2 · THE RESULTS (ONE SUB-FOLDER PER EXPERIMENT)</text>
+      <text class="mono title" x="336" y="386" font-size="15">outputs/&lt;experiment&gt;/</text>
+      <text class="muted mono" x="530" y="386" font-size="11.5">e.g. outputs/02_effnet_frozen/</text>
+
+      <rect class="chip" x="336" y="400" width="110" height="72" rx="6"/>
+      <text class="mono" x="391" y="422" font-size="12" text-anchor="middle" font-weight="500">best.pt</text>
+      <text class="lbl" x="391" y="440" text-anchor="middle">the trained</text>
+      <text class="lbl" x="391" y="455" text-anchor="middle">model</text>
+
+      <rect class="chip" x="454" y="400" width="110" height="72" rx="6"/>
+      <text class="mono" x="509" y="422" font-size="12" text-anchor="middle" font-weight="500">config.yaml</text>
+      <text class="lbl" x="509" y="440" text-anchor="middle">settings used</text>
+      <text class="lbl" x="509" y="455" text-anchor="middle">for this run</text>
+
+      <rect class="chip" x="572" y="400" width="110" height="72" rx="6"/>
+      <text class="mono" x="627" y="422" font-size="12" text-anchor="middle" font-weight="500">history.csv</text>
+      <text class="lbl" x="627" y="440" text-anchor="middle">loss + score</text>
+      <text class="lbl" x="627" y="455" text-anchor="middle">per epoch</text>
+
+      <rect class="chip" x="690" y="400" width="110" height="72" rx="6"/>
+      <text class="mono" x="745" y="422" font-size="12" text-anchor="middle" font-weight="500">summary.json</text>
+      <text class="lbl" x="745" y="440" text-anchor="middle">best validation</text>
+      <text class="lbl" x="745" y="455" text-anchor="middle">score</text>
+
+      <rect class="chip" x="808" y="400" width="110" height="72" rx="6"/>
+      <text class="mono" x="863" y="422" font-size="12" text-anchor="middle" font-weight="500">eval_*.csv</text>
+      <text class="lbl" x="863" y="440" text-anchor="middle">test scores,</text>
+      <text class="lbl" x="863" y="455" text-anchor="middle">clean + damaged</text>
+
+      <!-- arrows: processes <-> results band -->
+      <line class="write" x1="392.5" y1="268" x2="392.5" y2="336" marker-end="url(#aw)"/>
+      <text class="lbl" x="400" y="300">saves 4 files</text>
+
+      <line class="read"  x1="527" y1="336" x2="527" y2="270" marker-end="url(#ar)"/>
+      <text class="lbl" x="519" y="322" text-anchor="end">reads best.pt</text>
+      <line class="write" x1="570" y1="268" x2="570" y2="336" marker-end="url(#aw)"/>
+      <text class="lbl" x="578" y="300">saves eval_*.csv</text>
+
+      <line class="read" x1="702.5" y1="336" x2="702.5" y2="270" marker-end="url(#ar)"/>
+      <text class="lbl" x="710" y="322">reads eval_*.csv</text>
+
+      <line class="read" x1="857.5" y1="336" x2="857.5" y2="270" marker-end="url(#ar)"/>
+      <text class="lbl" x="850" y="300" text-anchor="end">reads best.pt</text>
+
+      <!-- note under 01/02 -->
+      <text class="muted" x="10" y="370" font-size="12.5">01 and 02 save nothing:</text>
+      <text class="muted" x="10" y="388" font-size="12.5">they only show numbers</text>
+      <text class="muted" x="10" y="406" font-size="12.5">and pictures on screen.</text>
+      <text class="muted" x="10" y="440" font-size="12">Every box also reads</text>
+      <text class="mono muted" x="10" y="458" font-size="11.5">configs/*.yaml</text>
+      <text class="muted" x="10" y="476" font-size="12">and the shared code in</text>
+      <text class="mono muted" x="10" y="494" font-size="11.5">src/deepfake_kyc/</text>
+    </svg>
+  </figure>
+  <div class="legend">
+    <span><i class="swatch"></i>saves files into the folder</span>
+    <span><i class="swatch read"></i>only reads from the folder</span>
+    <span><i class="box"></i>a folder on disk (shared “mailbox”)</span>
+  </div>
+  <figcaption>Nothing moves between notebooks directly. If a folder is empty, the notebook that reads it prints
+  “nothing found” and skips its charts.</figcaption>
+
+  <h2>2. How does each notebook know where to look?</h2>
+  <p>Every notebook and script follows the same three rules, so they always agree on the place and the file names:</p>
+  <ol class="steps">
+    <li><strong>Same starting point.</strong> Each notebook first finds the project folder (the one containing
+      <code>src/deepfake_kyc</code>). On Colab it clones the project from GitHub first. All other paths start from there.</li>
+    <li><strong>Same settings file.</strong> <code>configs/base.yaml</code> says where the images live
+      (<code>data.root: data/raw/real_vs_fake/real-vs-fake</code>) and where results go (<code>output_dir: outputs</code>).
+      Each experiment file in <code>configs/experiments/</code> adds an <code>experiment_name</code>, which becomes the
+      sub-folder name, e.g. <code>outputs/02_effnet_frozen/</code>.</li>
+    <li><strong>Same file names.</strong> Training always saves <code>best.pt</code>, <code>config.yaml</code>,
+      <code>history.csv</code> and <code>summary.json</code>. Evaluation always saves <code>eval_&lt;name&gt;.csv</code> next to
+      <code>best.pt</code>. Notebook 03 searches <code>outputs/*/eval_*.csv</code>, notebook 04 searches
+      <code>outputs/*/best.pt</code>.</li>
+  </ol>
+  <p class="note">Bonus: <code>best.pt</code> also stores the settings it was trained with, so notebook 04 can rebuild
+  exactly the same model and image size without guessing.</p>
+
+  <h2>3. The order to run things</h2>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>#</th><th>Run</th><th>Needs first</th><th>Leaves behind</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><code>01_explore_data</code></td><td>Kaggle <code>archive.zip</code> in <code>data/raw/</code></td><td>Images unpacked in <code>data/raw/real_vs_fake/real-vs-fake/</code></td></tr>
+      <tr><td>2</td><td><code>02_degradations_gallery</code></td><td>Nothing (uses a test image if no data)</td><td>Nothing, pictures only</td></tr>
+      <tr><td>3</td><td><code>05_next_architecture_effnet_b0</code> or <code>python -m deepfake_kyc.train --config …</code></td><td>Images from step 1</td><td><code>outputs/&lt;experiment&gt;/best.pt</code>, <code>config.yaml</code>, <code>history.csv</code>, <code>summary.json</code></td></tr>
+      <tr><td>4</td><td><code>python -m deepfake_kyc.evaluate --checkpoint outputs/&lt;experiment&gt;/best.pt --degradation all</code></td><td><code>best.pt</code> from step 3 + test images</td><td><code>outputs/&lt;experiment&gt;/eval_*.csv</code></td></tr>
+      <tr><td>5</td><td><code>03_results_charts</code></td><td><code>eval_*.csv</code> from step 4</td><td>Nothing, tables and charts only</td></tr>
+      <tr><td>6</td><td><code>04_error_analysis</code></td><td><code>best.pt</code> from step 3 + test images</td><td>Nothing, mistake pictures and heatmaps only</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="note">Repeat steps 3 and 4 for each experiment (01_baseline_cnn … 06_effnet_robust). Each gets its own
+  sub-folder in <code>outputs/</code>, and notebook 03 puts them all on the same chart.</p>
+
+  <h2>4. The important folders</h2>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Folder</th><th>What is inside</th><th>Saved to git?</th></tr></thead>
+    <tbody>
+      <tr><td><code>configs/</code></td><td><code>base.yaml</code> (shared settings) and <code>experiments/*.yaml</code> (one per experiment)</td><td>Yes</td></tr>
+      <tr><td><code>src/deepfake_kyc/</code></td><td>The shared Python code: data loading, models, training, evaluation, degradations</td><td>Yes</td></tr>
+      <tr><td><code>notebooks/</code></td><td>The six notebooks above</td><td>Yes (with outputs cleared)</td></tr>
+      <tr><td><code>data/raw/</code></td><td>The Kaggle zip and the unpacked images (about 4 GB)</td><td>No, only empty placeholder folders</td></tr>
+      <tr><td><code>outputs/</code></td><td>One sub-folder per experiment with the model and its scores</td><td>No, too big</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2>5. Watch out on Google Colab</h2>
+  <div class="callout"><strong>Each Colab session starts empty.</strong> When the session ends, everything under
+  <code>/content</code> (the cloned project, the images, and <code>outputs/</code>) is deleted. Each notebook re-clones the
+  project, but the images and trained models are gone. Keep <code>archive.zip</code> and your results in Google Drive.</div>
+  <div class="callout"><strong>Notebook 05 saves to Drive, notebooks 03 and 04 look in the project.</strong> With
+  <code>SAVE_OUTPUTS_TO_DRIVE = True</code>, notebook 05 saves into
+  <code>/content/drive/MyDrive/deepfake_kyc_outputs/&lt;experiment&gt;/</code>. Notebooks 03 and 04 search
+  <code>&lt;project&gt;/outputs/</code>, so they will say “nothing found”. Before running 03 or 04 in Colab, copy that
+  Drive folder into the project’s <code>outputs/</code> folder, or change their <code>OUTPUTS_DIR</code> to the Drive path.</div>
+  <div class="callout"><strong>Different notebooks can run in different Colab sessions.</strong> They do not share memory, only
+  files. A result is visible to the next notebook only if it is in a folder that notebook can see, which in practice
+  means Google Drive.</div>
+
+  <footer>Covers notebooks 01–05 and the <code>deepfake_kyc.train</code> / <code>deepfake_kyc.evaluate</code> scripts.
+  Folder names come from <code>configs/base.yaml</code>; file names come from <code>src/deepfake_kyc/train.py</code> and
+  <code>evaluate.py</code>. See also <a href="e2_notebook_flow.html">e2_notebook_flow.html</a> for the cell-by-cell flow of notebook 05.</footer>
+</main>
+</body>
+</html>

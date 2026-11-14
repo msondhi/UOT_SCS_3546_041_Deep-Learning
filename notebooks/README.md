@@ -2,7 +2,7 @@
 
 Use notebooks for **exploring and plotting**, and keep training code in `src/deepfake_kyc/`.
 
-Notebooks:
+Notebooks (how they share files through `data/raw/` and `outputs/`: [docs/2_notebook_flow.html](../docs/2_notebook_flow.html)):
 
 | Notebook | Purpose |
 |---|---|
