@@ -12,3 +12,4 @@ grad-cam>=1.5
 gradio>=4.0
 pytest>=8.0
 ruff>=0.4
+ipywidgets>=8.0

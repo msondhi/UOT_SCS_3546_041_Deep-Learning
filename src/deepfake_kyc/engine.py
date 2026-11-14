@@ -23,8 +23,14 @@ def warmup_cosine(warmup_steps: int, total_steps: int):
     return factor
 
 
-def train_one_epoch(model, loader: DataLoader, criterion, optimizer, scheduler, device) -> float:
+def train_one_epoch(
+    model, loader: DataLoader, criterion, optimizer, scheduler, device, freeze_batch_norm: bool = False
+) -> float:
     model.train()
+    if freeze_batch_norm:
+        for module in model.modules():
+            if isinstance(module, nn.modules.batchnorm._BatchNorm):
+                module.eval()
     total_loss, seen = 0.0, 0
     for images, labels in tqdm(loader, desc="train", leave=False):
         images, labels = images.to(device), labels.float().to(device)

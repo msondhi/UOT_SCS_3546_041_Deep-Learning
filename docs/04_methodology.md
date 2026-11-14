@@ -20,7 +20,7 @@ Training a big network from scratch needs millions of images. Instead, we start 
 ### Three ways to fine-tune
 | Strategy | What's trained | Experiment |
 |---|---|---|
-| Frozen backbone | Only the new head. The pretrained layers stay fixed. | E2 |
+| Frozen backbone | Only the new head. The pretrained layers and BatchNorm running statistics stay fixed. | E2 |
 | Full fine-tuning | Everything. The backbone learns 10× slower than the head. | E3 |
 | Gradual unfreezing | Head only for the first epoch, then everything | E4 |
 

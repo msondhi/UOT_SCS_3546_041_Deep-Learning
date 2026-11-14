@@ -68,7 +68,9 @@ def main(argv=None) -> dict:
         frozen = epoch <= tc["freeze_backbone_epochs"]
         set_backbone_trainable(model, not frozen)
         start = time.time()
-        train_loss = train_one_epoch(model, train_loader, criterion, optimizer, scheduler, device)
+        train_loss = train_one_epoch(
+            model, train_loader, criterion, optimizer, scheduler, device, freeze_batch_norm=frozen
+        )
         probs, labels, val_loss = predict(model, val_loader, device, criterion)
         val = compute_metrics(labels, probs)
         row = {

@@ -1,0 +1,357 @@
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>E2 Notebook Flow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* layout: a single scrolling column — pipeline figure, then architecture figure, then a short roadmap table */
+:root{
+  --bg:#f3f4f6;
+  --surface:#ffffff;
+  --border:#d7dae0;
+  --fg:#1b2430;
+  --muted-fg:#5b6472;
+  --accent:#2f6f6b;
+  --warn:#9a5a16;
+  --warn-fill:#f1ddbd;
+  --frozen-fill:#dde1e7;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#11151c;
+    --surface:#1a2029;
+    --border:#2b333f;
+    --fg:#e7eaf0;
+    --muted-fg:#9aa5b4;
+    --accent:#5fd1c9;
+    --warn:#e2a24d;
+    --warn-fill:#3a2f1c;
+    --frozen-fill:#2c3440;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11151c;
+  --surface:#1a2029;
+  --border:#2b333f;
+  --fg:#e7eaf0;
+  --muted-fg:#9aa5b4;
+  --accent:#5fd1c9;
+  --warn:#e2a24d;
+  --warn-fill:#3a2f1c;
+  --frozen-fill:#2c3440;
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--fg);
+  font-family:'Inter',system-ui,sans-serif;
+  font-size:15px;
+  line-height:1.55;
+  padding-left:max(16px, env(safe-area-inset-left,0px));
+  padding-right:max(16px, env(safe-area-inset-right,0px));
+  padding-block:32px;
+}
+main{max-width:920px;margin:0 auto}
+.eyebrow{
+  font-family:'JetBrains Mono',monospace;
+  font-size:12px;
+  color:var(--muted-fg);
+  letter-spacing:.02em;
+  word-break:break-all;
+}
+h1{
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;
+  font-size:clamp(26px,4.5vw,34px);
+  margin:.3em 0 .2em;
+  text-wrap:balance;
+}
+p.lede{color:var(--muted-fg);max-width:65ch;margin:0 0 1.8em}
+h2{
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;
+  font-size:19px;
+  margin:2.4em 0 .2em;
+  text-wrap:balance;
+}
+p.section-note{color:var(--muted-fg);max-width:70ch;margin:.3em 0 1em;font-size:14px}
+figure{margin:0;padding:0}
+figure.diagram{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:14px;
+  overflow-x:auto;
+}
+figure.diagram svg{display:block;width:100%;height:auto;min-width:640px}
+figcaption{
+  color:var(--muted-fg);
+  font-size:13px;
+  margin-top:.6em;
+  max-width:72ch;
+}
+code{font-family:'JetBrains Mono',monospace;font-size:.92em}
+.legend{
+  display:flex;gap:18px;flex-wrap:wrap;
+  font-size:12px;color:var(--muted-fg);
+  margin-top:10px;
+}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.swatch{width:12px;height:12px;border-radius:3px;display:inline-block;flex:none}
+table.roadmap{
+  width:100%;border-collapse:collapse;font-size:13.5px;margin-top:.6em;
+  min-width:520px;
+}
+table.roadmap caption{text-align:left;color:var(--muted-fg);font-size:13px;margin-bottom:6px}
+table.roadmap th,table.roadmap td{
+  text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);
+  vertical-align:top;
+}
+table.roadmap th{font-family:'Space Grotesk',sans-serif;font-weight:500;color:var(--muted-fg);font-size:12px;letter-spacing:.03em;text-transform:uppercase}
+table.roadmap tr.current td{background:color-mix(in srgb, var(--accent) 12%, transparent)}
+table.roadmap tr.current td:first-child{font-weight:600;color:var(--accent)}
+.table-wrap{overflow-x:auto}
+footer{
+  margin-top:2.6em;padding-top:1.2em;border-top:1px solid var(--border);
+  color:var(--muted-fg);font-size:12.5px;max-width:72ch;
+}
+</style>
+
+<main>
+  <p class="eyebrow">notebooks/05_next_architecture_effnet_b0.ipynb</p>
+  <h1>E2: frozen EfficientNet-B0</h1>
+  <p class="lede">A map of what the notebook runs and in what order (top), and what the model itself computes on one face image (bottom). Amber steps are opt-in and do nothing until you flip a flag.</p>
+
+  <h2>1. What the notebook runs, cell by cell</h2>
+  <p class="section-note">Everything through model verification runs automatically. Training and the final test evaluation are gated behind flags you set yourself — the notebook never trains or touches the test set on its own.</p>
+
+  <figure class="diagram">
+    <svg viewBox="0 0 920 1030" role="img" aria-label="Flowchart of the notebook: locate repo, install deps, load config, check data splits, optionally mount Drive or download from Kaggle, inspect dataset, seed and pick device, build and verify the model, then two opt-in gated steps for training and final test evaluation, ending with the next planned experiment.">
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+        </marker>
+      </defs>
+      <style>
+        text{font-family:'Inter',system-ui,sans-serif;fill:currentColor}
+        .title{font-size:13px;font-weight:600}
+        .sub{font-size:11px;fill:var(--muted-fg,#5b6472)}
+        .mono{font-family:'JetBrains Mono',monospace;font-size:10.5px;fill:var(--muted-fg,#5b6472)}
+        .node{fill:var(--surface,#fff);stroke:currentColor;stroke-width:1.2}
+        .pod{fill:var(--surface,#fff);stroke:currentColor;stroke-width:1;stroke-dasharray:4 3}
+        .opt{stroke:var(--warn,#9a5a16);stroke-width:1.6}
+        .optfill{fill:var(--warn-fill,#f1ddbd)}
+        .flow{stroke:currentColor;stroke-width:1.4;fill:none;marker-end:url(#arrow)}
+        .branch{stroke:currentColor;stroke-width:1;fill:none;stroke-dasharray:4 3;marker-end:url(#arrow)}
+      </style>
+
+      <!-- main spine x: 290-630, center 460 -->
+      <!-- n1 -->
+      <rect class="node" x="290" y="20" width="340" height="58" rx="8"/>
+      <text class="title" x="460" y="44" text-anchor="middle">Locate project / clone from GitHub</text>
+      <text class="mono" x="460" y="62" text-anchor="middle">→ PROJECT_ROOT</text>
+
+      <line class="flow" x1="460" y1="78" x2="460" y2="112"/>
+
+      <!-- n2 -->
+      <rect class="node" x="290" y="112" width="340" height="58" rx="8"/>
+      <text class="title" x="460" y="136" text-anchor="middle">Install missing notebook deps</text>
+      <text class="mono" x="460" y="154" text-anchor="middle">timm, scikit-learn, PyYAML, tqdm …</text>
+
+      <line class="flow" x1="460" y1="170" x2="460" y2="204"/>
+
+      <!-- n3 -->
+      <rect class="node" x="290" y="204" width="340" height="58" rx="8"/>
+      <text class="title" x="460" y="228" text-anchor="middle">Load experiment config</text>
+      <text class="mono" x="460" y="246" text-anchor="middle">configs/experiments/02_effnet_frozen.yaml</text>
+
+      <line class="flow" x1="460" y1="262" x2="460" y2="296"/>
+
+      <!-- n4 -->
+      <rect class="node" x="290" y="296" width="340" height="58" rx="8"/>
+      <text class="title" x="460" y="320" text-anchor="middle">Check data splits</text>
+      <text class="mono" x="460" y="338" text-anchor="middle">train / valid / test → DATA_AVAILABLE</text>
+
+      <!-- side pods aligned with n4 -->
+      <rect class="pod" x="30" y="296" width="220" height="58" rx="8"/>
+      <text class="title" x="140" y="318" text-anchor="middle" font-size="12">Mount Drive for outputs</text>
+      <text class="mono" x="140" y="335" text-anchor="middle" font-size="9.5">opt-in · SAVE_OUTPUTS_TO_DRIVE</text>
+      <path class="branch" d="M290,325 C 260,325 260,325 250,325"/>
+
+      <rect class="pod" x="670" y="296" width="220" height="58" rx="8"/>
+      <text class="title" x="780" y="318" text-anchor="middle" font-size="12">Download dataset (Kaggle)</text>
+      <text class="mono" x="780" y="335" text-anchor="middle" font-size="9.5">opt-in · ~4GB · needs API key</text>
+      <path class="branch" d="M630,325 C 660,325 660,325 670,325"/>
+
+      <line class="flow" x1="460" y1="354" x2="460" y2="388"/>
+
+      <!-- n5 inspect dataset, dashed = conditional -->
+      <rect class="pod" x="290" y="388" width="340" height="58" rx="8"/>
+      <text class="title" x="460" y="412" text-anchor="middle">Inspect dataset</text>
+      <text class="sub" x="460" y="430" text-anchor="middle">class counts + sample grid — only if DATA_AVAILABLE</text>
+
+      <line class="flow" x1="460" y1="446" x2="460" y2="480"/>
+
+      <!-- n6 -->
+      <rect class="node" x="290" y="480" width="340" height="58" rx="8"/>
+      <text class="title" x="460" y="504" text-anchor="middle">Seed(42) + pick device</text>
+      <text class="mono" x="460" y="522" text-anchor="middle">CUDA / Apple MPS / CPU</text>
+
+      <line class="flow" x1="460" y1="538" x2="460" y2="572"/>
+
+      <!-- n7 -->
+      <rect class="node" x="290" y="572" width="340" height="58" rx="8"/>
+      <text class="title" x="460" y="596" text-anchor="middle">Build E2 model, verify wiring</text>
+      <text class="sub" x="460" y="614" text-anchor="middle">freeze backbone · new 1-logit head · dummy-batch shape check</text>
+
+      <line class="flow" x1="460" y1="630" x2="460" y2="664"/>
+
+      <!-- n8 opt-in train -->
+      <rect class="node opt optfill" x="290" y="664" width="340" height="58" rx="8"/>
+      <text class="title" x="460" y="686" text-anchor="middle">OPT-IN — train on a subset</text>
+      <text class="sub" x="460" y="704" text-anchor="middle">1,000 train / 300 val imgs · 1 epoch</text>
+
+      <line class="flow" x1="460" y1="722" x2="460" y2="756"/>
+      <text class="mono" x="470" y="744" font-size="10">writes best.pt · history.csv · summary.json</text>
+
+      <!-- n9 -->
+      <rect class="node" x="290" y="756" width="340" height="58" rx="8"/>
+      <text class="title" x="460" y="780" text-anchor="middle">Read validation artifacts</text>
+      <text class="mono" x="460" y="798" text-anchor="middle">summary.json, history.csv</text>
+
+      <line class="flow" x1="460" y1="814" x2="460" y2="848"/>
+
+      <!-- n10 opt-in test eval -->
+      <rect class="node opt optfill" x="290" y="848" width="340" height="58" rx="8"/>
+      <text class="title" x="460" y="870" text-anchor="middle">OPT-IN, once — final test evaluation</text>
+      <text class="sub" x="460" y="888" text-anchor="middle">refuses to run if eval_test.csv already exists</text>
+
+      <line class="flow" x1="460" y1="906" x2="460" y2="940"/>
+      <text class="mono" x="470" y="928" font-size="10">writes eval_test.csv</text>
+
+      <!-- n11 -->
+      <rect class="node" x="290" y="940" width="340" height="58" rx="8"/>
+      <text class="title" x="460" y="964" text-anchor="middle">Next: E3 full fine-tune</text>
+      <text class="sub" x="460" y="982" text-anchor="middle">+ robustness &amp; out-of-distribution tests</text>
+
+      <!-- legend -->
+      <rect x="30" y="1000" width="14" height="14" rx="3" class="optfill opt"/>
+      <text x="52" y="1011" font-size="11" class="sub">opt-in step, off by default</text>
+      <line x1="230" y1="1007" x2="270" y2="1007" class="branch"/>
+      <text x="278" y="1011" font-size="11" class="sub">conditional / optional path</text>
+    </svg>
+    <div class="legend">
+      <span><span class="swatch" style="background:var(--warn-fill);border:1px solid var(--warn)"></span>opt-in — requires flipping a flag in the notebook</span>
+      <span><span class="swatch" style="border:1px dashed var(--muted-fg);background:transparent"></span>conditional on data availability or a user switch</span>
+    </div>
+    <figcaption>Only the first seven boxes run unattended. Training and the held-out test evaluation are deliberately opt-in so you don't start a 4GB download or burn the test set by accident.</figcaption>
+  </figure>
+
+  <h2>2. What the model computes on one image</h2>
+  <p class="section-note">Everything left of the head is pretrained on ImageNet and frozen — no gradients flow into it. Only the new one-logit classifier (and the dropout path feeding it) is trained.</p>
+
+  <figure class="diagram">
+    <svg viewBox="0 0 1180 260" role="img" aria-label="Forward pass: a 224 by 224 RGB face image is normalized, passed through a frozen pretrained EfficientNet-B0 backbone, pooled into a feature vector, passed through dropout, then a new trainable linear layer producing one logit, then a sigmoid giving the probability the face is fake, thresholded at 0.5.">
+      <defs>
+        <marker id="arrow2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+        </marker>
+      </defs>
+      <style>
+        text{font-family:'Inter',system-ui,sans-serif;fill:currentColor}
+        .t{font-size:12.5px;font-weight:600;text-anchor:middle}
+        .s{font-size:10.5px;fill:var(--muted-fg,#5b6472);text-anchor:middle}
+        .box{stroke:currentColor;stroke-width:1.2}
+        .arr{stroke:currentColor;stroke-width:1.4;fill:none;marker-end:url(#arrow2)}
+      </style>
+
+      <!-- 1 input -->
+      <rect class="box" x="10" y="95" width="120" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="70" y="135">RGB face</text>
+      <text class="s" x="70" y="152">224×224×3</text>
+
+      <line class="arr" x1="130" y1="145" x2="148" y2="145"/>
+
+      <!-- 2 normalize -->
+      <rect class="box" x="150" y="95" width="130" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="215" y="130">ImageNet</text>
+      <text class="t" x="215" y="148">normalize</text>
+      <text class="s" x="215" y="165">mean / std</text>
+
+      <line class="arr" x1="280" y1="145" x2="298" y2="145"/>
+
+      <!-- 3 backbone frozen -->
+      <rect class="box" x="300" y="95" width="220" height="100" rx="8" fill="var(--frozen-fill)"/>
+      <text class="t" x="410" y="128">EfficientNet-B0</text>
+      <text class="t" x="410" y="146">backbone</text>
+      <text class="s" x="410" y="164">pretrained · frozen (no gradient)</text>
+
+      <line class="arr" x1="520" y1="145" x2="538" y2="145"/>
+
+      <!-- 4 pooled -->
+      <rect class="box" x="540" y="95" width="120" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="600" y="135">Pooled</text>
+      <text class="t" x="600" y="153">feature vector</text>
+
+      <line class="arr" x1="660" y1="145" x2="678" y2="145"/>
+
+      <!-- 5 dropout -->
+      <rect class="box" x="680" y="95" width="90" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="725" y="140">Dropout</text>
+      <text class="s" x="725" y="157">0.2</text>
+
+      <line class="arr" x1="770" y1="145" x2="788" y2="145"/>
+
+      <!-- 6 linear head trainable -->
+      <rect class="box" x="790" y="95" width="130" height="100" rx="8" fill="var(--accent)"/>
+      <text class="t" x="855" y="130" fill="var(--surface)">New linear</text>
+      <text class="t" x="855" y="148" fill="var(--surface)">head</text>
+      <text class="s" x="855" y="165" fill="var(--surface)" opacity="0.9">1 logit · trainable</text>
+
+      <line class="arr" x1="920" y1="145" x2="938" y2="145"/>
+
+      <!-- 7 sigmoid -->
+      <rect class="box" x="940" y="95" width="80" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="980" y="145">Sigmoid</text>
+
+      <line class="arr" x1="1020" y1="145" x2="1038" y2="145"/>
+
+      <!-- 8 output -->
+      <rect class="box" x="1040" y="95" width="130" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="1105" y="130">P(fake)</text>
+      <text class="s" x="1105" y="147">threshold</text>
+      <text class="s" x="1105" y="162">0.5 default</text>
+
+      <!-- legend -->
+      <rect x="300" y="225" width="14" height="14" rx="3" fill="var(--frozen-fill)" stroke="currentColor" stroke-width="1"/>
+      <text x="320" y="236" font-size="11" class="s" text-anchor="start">frozen — pretrained weights, untouched</text>
+      <rect x="610" y="225" width="14" height="14" rx="3" fill="var(--accent)" stroke="currentColor" stroke-width="1"/>
+      <text x="630" y="236" font-size="11" class="s" text-anchor="start" fill="var(--accent)">trainable — updated by this run</text>
+    </svg>
+    <figcaption>EfficientNet-B0 carries roughly 5M pretrained parameters; E2 trains none of them. The only thing learning is the new linear layer mapping pooled features to one logit, via <code>BCEWithLogitsLoss</code> and AdamW. The config sets <code>train.freeze_backbone_epochs=999</code> to keep it that way for the whole run.</figcaption>
+  </figure>
+
+  <h2>3. Where E2 sits in the experiment plan</h2>
+  <div class="table-wrap">
+  <table class="roadmap">
+    <caption>From the project's experiment plan — E1 already exists, E2 is this notebook, E3–E6 come after.</caption>
+    <thead><tr><th>Exp</th><th>Model</th><th>What changes vs. E2</th></tr></thead>
+    <tbody>
+      <tr><td>E1</td><td>SimpleCNN</td><td>trained from scratch, no pretrained weights</td></tr>
+      <tr class="current"><td>E2</td><td>EfficientNet-B0</td><td>frozen pretrained backbone, train only the head (this notebook)</td></tr>
+      <tr><td>E3</td><td>EfficientNet-B0</td><td>full fine-tune of the whole backbone, lower learning rate</td></tr>
+      <tr><td>E4</td><td>EfficientNet-B0</td><td>gradual unfreezing of backbone layers</td></tr>
+      <tr><td>E5</td><td>ResNet-50</td><td>different backbone architecture</td></tr>
+      <tr><td>E6</td><td>EfficientNet-B0</td><td>degradation-aware training (blur, JPEG, noise, screen capture)</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <footer>
+    Validation results only — the test split stays untouched until a model is chosen, and the final-evaluation cell refuses to overwrite an existing <code>eval_test.csv</code>. This is a research classifier for examples in a benchmark dataset; it does not establish identity or prove fraud on its own.
+  </footer>
+</main>

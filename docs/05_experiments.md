@@ -14,6 +14,8 @@ Every experiment is a YAML file in `configs/experiments/`. Each file starts from
 | E6 | `06_effnet_robust.yaml` | Does degradation-aware training improve robustness? | E3 |
 | E7 | E3 with `--set` subsets | How much data do we need? | E3 |
 
+E2's notebook walkthrough is `notebooks/05_next_architecture_effnet_b0.ipynb`; see [docs/e2_notebook_flow.html](e2_notebook_flow.html) for a diagram of that notebook's flow and the frozen-backbone model architecture.
+
 ## How to run
 
 ```bash

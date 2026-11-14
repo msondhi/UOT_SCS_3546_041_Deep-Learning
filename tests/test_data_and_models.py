@@ -3,9 +3,13 @@ from pathlib import Path
 import pytest
 import torch
 from conftest import REPO_ROOT
+from torch import nn
+from torch.optim.lr_scheduler import LambdaLR
+from torch.utils.data import DataLoader, TensorDataset
 
 from deepfake_kyc.config import load_config
 from deepfake_kyc.data import build_loader, make_dataset
+from deepfake_kyc.engine import train_one_epoch
 from deepfake_kyc.models import build_model, gradcam_target_layer, set_backbone_trainable, split_parameters
 
 
@@ -35,3 +39,28 @@ def test_models_output_one_logit_and_freeze(name):
     assert backbone and head
     assert not any(p.requires_grad for p in backbone)
     assert all(p.requires_grad for p in head)
+
+
+def test_frozen_batch_norm_statistics_do_not_update():
+    model = nn.Sequential(nn.BatchNorm1d(2), nn.Linear(2, 1))
+    model[0].weight.requires_grad_(False)
+    model[0].bias.requires_grad_(False)
+    optimizer = torch.optim.AdamW((p for p in model.parameters() if p.requires_grad), lr=0.01)
+    scheduler = LambdaLR(optimizer, lambda _: 1.0)
+    loader = DataLoader(
+        TensorDataset(torch.tensor([[1.0, 2.0], [3.0, 4.0]]), torch.tensor([0, 1])),
+        batch_size=2,
+    )
+    initial_mean = model[0].running_mean.clone()
+    initial_var = model[0].running_var.clone()
+    initial_batches = model[0].num_batches_tracked.clone()
+    initial_head = model[1].weight.detach().clone()
+
+    train_one_epoch(
+        model, loader, nn.BCEWithLogitsLoss(), optimizer, scheduler, torch.device("cpu"), freeze_batch_norm=True
+    )
+
+    assert torch.equal(model[0].running_mean, initial_mean)
+    assert torch.equal(model[0].running_var, initial_var)
+    assert torch.equal(model[0].num_batches_tracked, initial_batches)
+    assert not torch.equal(model[1].weight, initial_head)

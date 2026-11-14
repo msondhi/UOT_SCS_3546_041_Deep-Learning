@@ -6,8 +6,11 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 
-# Data and results (never commit datasets or model weights)
-data/
+# Data and results (never commit datasets or model weights).
+# The empty data/ folder skeleton is kept with .gitkeep files; images are never tracked.
+data/**
+!data/**/
+!data/**/.gitkeep
 outputs/
 *.pt
 *.pth

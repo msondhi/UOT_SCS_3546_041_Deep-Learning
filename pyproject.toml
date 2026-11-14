@@ -23,7 +23,7 @@ dependencies = [
 
 [project.optional-dependencies]
 demo = ["gradio>=4.0"]
-dev = ["pytest>=8.0", "ruff>=0.4"]
+dev = ["pytest>=8.0", "ruff>=0.4", "ipywidgets>=8.0"]
 
 [project.scripts]
 dfk-train = "deepfake_kyc.train:main"

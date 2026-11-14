@@ -28,6 +28,15 @@ data/raw/real_vs_fake/real-vs-fake/
 
 If Kaggle changes the folder names, update `data.root` in `configs/base.yaml`.
 
+The empty folder skeleton is committed (each leaf folder holds a `.gitkeep` placeholder) so the layout is visible
+in a fresh checkout. Images are still git-ignored and must be added on every machine. Three ways to add them:
+
+1. `make data` (or `bash scripts/download_data.sh`) downloads and unzips from Kaggle using an API token.
+2. Download the zip from the Kaggle page with your browser and unzip it into `data/raw/`; the zip already contains
+   the `real_vs_fake/real-vs-fake/...` folders.
+3. Open `notebooks/01_explore_data.ipynb` and use Step 2: type the path of the zip or folder and click **Open path**,
+   or click **Upload zip** for a small zip. The notebook extracts into `data/raw/` for you.
+
 ## Labels
 | Folder | Label | Meaning |
 |---|---|---|
