@@ -289,7 +289,23 @@ svg .lane{font-size:11px;fill:var(--muted-fg);letter-spacing:.06em}
   </table>
   </div>
 
-  <h2>5. Watch out on Google Colab</h2>
+  <h2>5. On Kaggle</h2>
+  <p>The same notebooks run on Kaggle without changes; Step 1 of each notebook detects it (<code>ON_KAGGLE</code>).
+  The two folders from the diagram simply live somewhere else:</p>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Folder in the diagram</th><th>On Kaggle</th><th>How it gets there</th></tr></thead>
+    <tbody>
+      <tr><td>Folder 1 · the images</td><td><code>/kaggle/input/…/real_vs_fake/real-vs-fake/</code></td><td><strong>Add Input → Datasets → “140k Real and Fake Faces”</strong>, read-only, no unzipping</td></tr>
+      <tr><td>Folder 2 · the results</td><td><code>/kaggle/working/UOT_SCS_3546_041_Deep-Learning/outputs/</code></td><td>Saved by notebook 05; kept only after <strong>Save Version → Save &amp; Run All</strong></td></tr>
+      <tr><td>Results of another notebook</td><td><code>/kaggle/input/&lt;notebook&gt;/…/outputs/</code></td><td><strong>Add Input → Your Work →</strong> saved notebook 05, read-only; notebooks 03 and 04 search it</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="note">Turn on <strong>Settings → Internet</strong> (to clone the code) and, for training and scoring,
+  <strong>Settings → Accelerator → GPU</strong>.</p>
+
+  <h2>6. Watch out on Google Colab</h2>
   <div class="callout"><strong>Each Colab session starts empty.</strong> When the session ends, everything under
   <code>/content</code> (the cloned project, the images, and <code>outputs/</code>) is deleted. Each notebook re-clones the
   project, but the images and trained models are gone. Keep <code>archive.zip</code> and your results in Google Drive.</div>
