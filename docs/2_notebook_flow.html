@@ -293,11 +293,10 @@ svg .lane{font-size:11px;fill:var(--muted-fg);letter-spacing:.06em}
   <div class="callout"><strong>Each Colab session starts empty.</strong> When the session ends, everything under
   <code>/content</code> (the cloned project, the images, and <code>outputs/</code>) is deleted. Each notebook re-clones the
   project, but the images and trained models are gone. Keep <code>archive.zip</code> and your results in Google Drive.</div>
-  <div class="callout"><strong>Notebook 05 saves to Drive, notebooks 03 and 04 look in the project.</strong> With
-  <code>SAVE_OUTPUTS_TO_DRIVE = True</code>, notebook 05 saves into
-  <code>/content/drive/MyDrive/deepfake_kyc_outputs/&lt;experiment&gt;/</code>. Notebooks 03 and 04 search
-  <code>&lt;project&gt;/outputs/</code>, so they will say “nothing found”. Before running 03 or 04 in Colab, copy that
-  Drive folder into the project’s <code>outputs/</code> folder, or change their <code>OUTPUTS_DIR</code> to the Drive path.</div>
+  <div class="callout"><strong>On Colab, results live in Google Drive.</strong> Notebook 05 saves into
+  <code>/content/drive/MyDrive/deepfake_kyc_outputs/&lt;experiment&gt;/</code>, and notebooks 03 and 04 search that
+  Drive folder as well as <code>&lt;project&gt;/outputs/</code>, so they find each other’s files. Notebooks 01, 04 and 05
+  read the dataset zip from the same place: <code>MyDrive/archive.zip</code>.</div>
   <div class="callout"><strong>Different notebooks can run in different Colab sessions.</strong> They do not share memory, only
   files. A result is visible to the next notebook only if it is in a folder that notebook can see, which in practice
   means Google Drive.</div>

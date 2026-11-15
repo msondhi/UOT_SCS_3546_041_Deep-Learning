@@ -10,7 +10,7 @@ Notebooks (how they share files through `data/raw/` and `outputs/`: [docs/2_note
 | `02_degradations_gallery.ipynb` | Show one face under every degradation at severities 1-5 (good report figure) |
 | `03_results_charts.ipynb` | Load `outputs/*/eval_test.csv` and draw the robustness charts and results tables |
 | `04_error_analysis.ipynb` | Browse false positives and false negatives, with Grad-CAM |
-| `05_next_architecture_effnet_b0.ipynb` | Google Colab-ready E2 walkthrough: GPU/dependency setup, optional Kaggle download, Drive outputs, frozen EfficientNet-B0 diagram, and opt-in training — see [docs/e2_notebook_flow.html](../docs/e2_notebook_flow.html) for the full notebook flow and model architecture diagrams |
+| `05_next_architecture_effnet_b0.ipynb` | Train E2 (frozen EfficientNet-B0), Colab-ready: get the data from Drive or Kaggle, check the model, opt-in quick or full training, loss chart, and a once-only final test score |
 
 ## Using the project code in a notebook
 Select the `.venv` kernel in VS Code or Jupyter, then:
