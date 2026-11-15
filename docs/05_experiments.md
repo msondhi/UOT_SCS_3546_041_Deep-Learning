@@ -2,6 +2,8 @@
 
 Every experiment is a YAML file in `configs/experiments/`. Each file starts from `configs/base.yaml` and lists only what changes, so it's easy to see exactly what differs between experiments.
 
+All experiments train on real and fake faces with degradation-aware augmentation on (`augment.degradation: true` in `base.yaml`): each training photo has a 50% chance of a random blur/JPEG/downscale/noise/screen effect, generated on the fly. E6 is the one exception, kept as a clean-training control.
+
 ## Experiment plan
 
 | ID | Config | Question it answers | Compare with |
@@ -11,7 +13,7 @@ Every experiment is a YAML file in `configs/experiments/`. Each file starts from
 | E3 | `03_effnet_finetune.yaml` | Does full fine-tuning help? (**main model**) | E2 |
 | E4 | `04_effnet_gradual.yaml` | Does gradual unfreezing help? | E3 |
 | E5 | `05_resnet50_finetune.yaml` | Does the architecture matter? | E3 |
-| E6 | `06_effnet_robust.yaml` | Does degradation-aware training improve robustness? | E3 |
+| E6 | `06_effnet_clean.yaml` | Control: E3 trained on clean photos only. Does degradation-aware training improve robustness? | E3 |
 | E7 | E3 with `--set` subsets | How much data do we need? | E3 |
 
 E2's notebook walkthrough is `notebooks/05_next_architecture_effnet_b0.ipynb`; see [docs/e2_notebook_flow.html](e2_notebook_flow.html) for a diagram of that notebook's flow and the frozen-backbone model architecture.
@@ -83,7 +85,7 @@ Split the runs across team members' laptops and Colab so they happen in parallel
 | E3 | EfficientNet-B0 | fine-tune | | | | | | |
 | E4 | EfficientNet-B0 | gradual | | | | | | |
 | E5 | ResNet-50 | fine-tune | | | | | | |
-| E6 | EfficientNet-B0 | fine-tune + robust aug | | | | | | |
+| E6 | EfficientNet-B0 | fine-tune, no damage aug (control) | | | | | | |
 
 ### Robustness (accuracy, E3 vs. E6)
 | Degradation | Sev 1 | Sev 3 | Sev 5 |

@@ -16,7 +16,7 @@
 |---|---|---|
 | 6-7 | E3 (main model) and E4 (gradual) | Results logged |
 | 7-8 | E5 (ResNet-50) and E7 (data-size study) | Results logged |
-| 8-9 | E6 (robust training) | Results logged |
+| 8-9 | E6 (clean-training control) | Results logged |
 | 9-10 | Robustness eval for E3 and E6; OOD eval | `eval_test.csv`, `eval_ood.csv` for both |
 
 ### Week 3: Analysis and delivery
@@ -32,7 +32,7 @@
 |---|---|---|
 | [Name]: law enforcement | Robustness testing, Grad-CAM and error analysis, ethics section | Report editing |
 | [Name]: payments | Data pipeline, E1-E5 training, results tables | KYC/onboarding context, cost of errors |
-| [Name]: payments | E6 robust training, OOD set, demo app | Threshold/FAR-FRR discussion |
+| [Name]: payments | E6 control run, OOD set, demo app | Threshold/FAR-FRR discussion |
 
 Everyone: review each other's pull requests (see [CONTRIBUTING](../CONTRIBUTING.md)).
 

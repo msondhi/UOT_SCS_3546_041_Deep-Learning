@@ -16,8 +16,9 @@ data:
 
 augment:
   standard: true        # random crop, horizontal flip, colour jitter
-  degradation: false    # add random JPEG/blur/downscale/noise/screen effects during training
-  degradation_prob: 0.5
+  degradation: true     # add random JPEG/blur/downscale/noise/screen effects during training (train split only;
+                        # valid/test stay clean). E6 turns this off as the clean-training control.
+  degradation_prob: 0.5 # chance that each training photo gets one random damage at a random severity 1-5
 
 model:
   name: efficientnet_b0 # simple_cnn, or any timm model: efficientnet_b0, resnet50, vit_small_patch16_224
