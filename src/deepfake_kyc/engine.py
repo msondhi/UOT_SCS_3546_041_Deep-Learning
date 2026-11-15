@@ -24,8 +24,16 @@ def warmup_cosine(warmup_steps: int, total_steps: int):
 
 
 def train_one_epoch(
-    model, loader: DataLoader, criterion, optimizer, scheduler, device, freeze_batch_norm: bool = False
+    model,
+    loader: DataLoader,
+    criterion,
+    optimizer,
+    scheduler,
+    device,
+    freeze_batch_norm: bool = False,
+    scaler: torch.amp.GradScaler | None = None,
 ) -> float:
+    """One pass over the training data. ``scaler`` switches on mixed precision (GPU only, about 2x faster)."""
     model.train()
     if freeze_batch_norm:
         for module in model.modules():
@@ -33,11 +41,18 @@ def train_one_epoch(
                 module.eval()
     total_loss, seen = 0.0, 0
     for images, labels in tqdm(loader, desc="train", leave=False):
-        images, labels = images.to(device), labels.float().to(device)
-        loss = criterion(model(images).squeeze(1), labels)
+        images = images.to(device, non_blocking=True)
+        labels = labels.float().to(device, non_blocking=True)
+        with torch.autocast(device_type=device.type, enabled=scaler is not None):
+            loss = criterion(model(images).squeeze(1).float(), labels)
         optimizer.zero_grad(set_to_none=True)
-        loss.backward()
-        optimizer.step()
+        if scaler is not None:
+            scaler.scale(loss).backward()
+            scaler.step(optimizer)
+            scaler.update()
+        else:
+            loss.backward()
+            optimizer.step()
         scheduler.step()
         total_loss += loss.item() * len(labels)
         seen += len(labels)
@@ -46,11 +61,12 @@ def train_one_epoch(
 
 @torch.no_grad()
 def predict(model, loader: DataLoader, device, criterion: nn.Module | None = None):
-    """Return (P(fake) per image, true labels, mean loss or nan)."""
+    """Return (P(fake) per image, true labels, mean loss or nan). Uses mixed precision on a GPU."""
     model.eval()
     all_probs, all_labels, total_loss = [], [], 0.0
     for images, labels in tqdm(loader, desc="eval", leave=False):
-        logits = model(images.to(device)).squeeze(1)
+        with torch.autocast(device_type=device.type, enabled=device.type == "cuda"):
+            logits = model(images.to(device, non_blocking=True)).squeeze(1).float()
         if criterion is not None:
             total_loss += criterion(logits, labels.float().to(device)).item() * len(labels)
         all_probs.append(torch.sigmoid(logits).cpu())

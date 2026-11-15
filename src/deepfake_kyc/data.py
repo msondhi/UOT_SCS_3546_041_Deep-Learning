@@ -100,4 +100,5 @@ def build_loader(
         shuffle=train,
         num_workers=d["num_workers"],
         persistent_workers=d["num_workers"] > 0,
+        pin_memory=torch.cuda.is_available(),   # faster copies from CPU memory to the GPU
     )

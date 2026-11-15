@@ -2,7 +2,8 @@
 
 Use notebooks for **exploring and plotting**, and keep training code in `src/deepfake_kyc/`.
 
-Notebooks (how they share files through `data/raw/` and `outputs/`: [docs/2_notebook_flow.html](../docs/2_notebook_flow.html)):
+The notebooks are made for **Kaggle** (see "Running the notebooks on Kaggle" below). How they share files
+through the attached dataset and `outputs/`: [docs/2_notebook_flow.html](../docs/2_notebook_flow.html).
 
 | Notebook | Purpose |
 |---|---|
@@ -10,11 +11,12 @@ Notebooks (how they share files through `data/raw/` and `outputs/`: [docs/2_note
 | `02_degradations_gallery.ipynb` | Show one face under every degradation at severities 1-5 (good report figure) |
 | `03_results_charts.ipynb` | Load `outputs/*/eval_test.csv` and draw the robustness charts and results tables |
 | `04_error_analysis.ipynb` | Browse false positives and false negatives, with Grad-CAM |
-| `05_next_architecture_effnet_b0.ipynb` | Train any experiment(s) E1-E6 (choose `EXPERIMENTS` in Step 2; each is saved in its own `outputs/<experiment>/` folder and never overwritten), Colab/Kaggle-ready: get the data from Drive or Kaggle, check the model, opt-in quick or full training, loss chart, and a once-only final test score |
+| `05_next_architecture_effnet_b0.ipynb` | Train any experiment(s) E1-E6 (choose `EXPERIMENTS` in Step 2; each is saved in its own `outputs/<experiment>/` folder and never overwritten), check the attached data, check each model, opt-in quick or full training, loss charts, and a once-only final test score |
 
 ## Running the notebooks on Kaggle
 
-Every notebook detects Kaggle by itself (`ON_KAGGLE` in Step 1) and uses Kaggle's folders. Setup for each notebook:
+Step 1 of every notebook clones the project code into `/kaggle/working/` and finds the attached dataset under
+`/kaggle/input/`. Setup for each notebook:
 
 1. **Open it:** on kaggle.com → **Create → New Notebook → File → Import Notebook**, and paste the notebook's
    GitHub link, e.g. `https://github.com/msondhi/UOT_SCS_3546_041_Deep-Learning/blob/main/notebooks/01_explore_data.ipynb`.

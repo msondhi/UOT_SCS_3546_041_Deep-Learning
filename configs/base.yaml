@@ -33,3 +33,4 @@ train:
   warmup_epochs: 1
   freeze_backbone_epochs: 0   # 0 = train everything from the start; >= epochs = backbone frozen throughout
   early_stopping_patience: 2
+  amp: true             # mixed precision on a GPU: about 2x faster, same accuracy (ignored on CPU)

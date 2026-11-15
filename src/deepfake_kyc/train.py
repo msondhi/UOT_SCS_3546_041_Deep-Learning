@@ -63,13 +63,21 @@ def main(argv=None) -> dict:
     )
     criterion = nn.BCEWithLogitsLoss()
 
+    # GPU speed-ups: mixed precision (about 2x faster on T4/P100, same accuracy) and letting cuDNN
+    # pick the fastest convolution method for our fixed image size.
+    use_amp = device.type == "cuda" and tc.get("amp", True)
+    scaler = torch.amp.GradScaler("cuda") if use_amp else None
+    if device.type == "cuda":
+        torch.backends.cudnn.benchmark = True
+    print(f"Mixed precision: {'on' if use_amp else 'off'}  |  data-loading workers: {cfg['data']['num_workers']}")
+
     history, best_val_loss, epochs_without_improvement = [], float("inf"), 0
     for epoch in range(1, tc["epochs"] + 1):
         frozen = epoch <= tc["freeze_backbone_epochs"]
         set_backbone_trainable(model, not frozen)
         start = time.time()
         train_loss = train_one_epoch(
-            model, train_loader, criterion, optimizer, scheduler, device, freeze_batch_norm=frozen
+            model, train_loader, criterion, optimizer, scheduler, device, freeze_batch_norm=frozen, scaler=scaler
         )
         probs, labels, val_loss = predict(model, val_loader, device, criterion)
         val = compute_metrics(labels, probs)

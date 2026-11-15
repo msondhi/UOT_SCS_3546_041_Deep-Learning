@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-/* layout: one column — intro, the big folder/notebook diagram, then run order, folder table and Colab notes */
+/* layout: one column — intro, the big folder/notebook diagram, then run order, folder table and Kaggle notes */
 :root{
   --bg:#f3f4f6;
   --surface:#ffffff;
@@ -128,7 +128,7 @@ svg .lane{font-size:11px;fill:var(--muted-fg);letter-spacing:.06em}
       <text class="lane" x="26" y="36">FOLDER 1 · THE IMAGES</text>
       <text class="mono title" x="26" y="62" font-size="16">data/raw/real_vs_fake/real-vs-fake/</text>
       <text class="mono" x="26" y="86" font-size="12.5">train/  valid/  test/   →  each has  real/*.jpg  and  fake/*.jpg</text>
-      <text class="muted" x="26" y="104" font-size="12">You put Kaggle’s archive.zip in data/raw/ · notebook 01 Step 2b unpacks it here · never saved to git</text>
+      <text class="muted" x="26" y="104" font-size="12">On Kaggle: attached with Add Input under /kaggle/input/ · read-only · never saved to git</text>
 
       <!-- process row -->
       <g>
@@ -245,7 +245,7 @@ svg .lane{font-size:11px;fill:var(--muted-fg);letter-spacing:.06em}
   <p>Every notebook and script follows the same three rules, so they always agree on the place and the file names:</p>
   <ol class="steps">
     <li><strong>Same starting point.</strong> Each notebook first finds the project folder (the one containing
-      <code>src/deepfake_kyc</code>). On Colab it clones the project from GitHub first. All other paths start from there.</li>
+      <code>src/deepfake_kyc</code>). On Kaggle, Step 1 clones the project from GitHub into <code>/kaggle/working/</code>. All other paths start from there.</li>
     <li><strong>Same settings file.</strong> <code>configs/base.yaml</code> says where the images live
       (<code>data.root: data/raw/real_vs_fake/real-vs-fake</code>) and where results go (<code>output_dir: outputs</code>).
       Each experiment file in <code>configs/experiments/</code> adds an <code>experiment_name</code>, which becomes the
@@ -263,9 +263,9 @@ svg .lane{font-size:11px;fill:var(--muted-fg);letter-spacing:.06em}
   <table>
     <thead><tr><th>#</th><th>Run</th><th>Needs first</th><th>Leaves behind</th></tr></thead>
     <tbody>
-      <tr><td>1</td><td><code>01_explore_data</code></td><td>Kaggle <code>archive.zip</code> in <code>data/raw/</code></td><td>Images unpacked in <code>data/raw/real_vs_fake/real-vs-fake/</code></td></tr>
+      <tr><td>1</td><td><code>01_explore_data</code></td><td>The dataset attached with <strong>Add Input</strong></td><td>Nothing, counts and pictures only</td></tr>
       <tr><td>2</td><td><code>02_degradations_gallery</code></td><td>Nothing (uses a test image if no data)</td><td>Nothing, pictures only</td></tr>
-      <tr><td>3</td><td><code>05_next_architecture_effnet_b0</code> or <code>python -m deepfake_kyc.train --config …</code></td><td>Images from step 1</td><td><code>outputs/&lt;experiment&gt;/best.pt</code>, <code>config.yaml</code>, <code>history.csv</code>, <code>summary.json</code></td></tr>
+      <tr><td>3</td><td><code>05_next_architecture_effnet_b0</code> or <code>python -m deepfake_kyc.train --config …</code></td><td>The attached dataset</td><td><code>outputs/&lt;experiment&gt;/best.pt</code>, <code>config.yaml</code>, <code>history.csv</code>, <code>summary.json</code></td></tr>
       <tr><td>4</td><td><code>python -m deepfake_kyc.evaluate --checkpoint outputs/&lt;experiment&gt;/best.pt --degradation all</code></td><td><code>best.pt</code> from step 3 + test images</td><td><code>outputs/&lt;experiment&gt;/eval_*.csv</code></td></tr>
       <tr><td>5</td><td><code>03_results_charts</code></td><td><code>eval_*.csv</code> from step 4</td><td>Nothing, tables and charts only</td></tr>
       <tr><td>6</td><td><code>04_error_analysis</code></td><td><code>best.pt</code> from step 3 + test images</td><td>Nothing, mistake pictures and heatmaps only</td></tr>
@@ -289,9 +289,9 @@ svg .lane{font-size:11px;fill:var(--muted-fg);letter-spacing:.06em}
   </table>
   </div>
 
-  <h2>5. On Kaggle</h2>
-  <p>The same notebooks run on Kaggle without changes; Step 1 of each notebook detects it (<code>ON_KAGGLE</code>).
-  The two folders from the diagram simply live somewhere else:</p>
+  <h2>5. On Kaggle (where the notebooks run)</h2>
+  <p>The notebooks are made for Kaggle. Step 1 of each one clones the project code and finds the attached dataset.
+  The two folders from the diagram live here:</p>
   <div class="table-wrap">
   <table>
     <thead><tr><th>Folder in the diagram</th><th>On Kaggle</th><th>How it gets there</th></tr></thead>
@@ -305,17 +305,14 @@ svg .lane{font-size:11px;fill:var(--muted-fg);letter-spacing:.06em}
   <p class="note">Turn on <strong>Settings → Internet</strong> (to clone the code) and, for training and scoring,
   <strong>Settings → Accelerator → GPU</strong>.</p>
 
-  <h2>6. Watch out on Google Colab</h2>
-  <div class="callout"><strong>Each Colab session starts empty.</strong> When the session ends, everything under
-  <code>/content</code> (the cloned project, the images, and <code>outputs/</code>) is deleted. Each notebook re-clones the
-  project, but the images and trained models are gone. Keep <code>archive.zip</code> and your results in Google Drive.</div>
-  <div class="callout"><strong>On Colab, results live in Google Drive.</strong> Notebook 05 saves into
-  <code>/content/drive/MyDrive/deepfake_kyc_outputs/&lt;experiment&gt;/</code>, and notebooks 03 and 04 search that
-  Drive folder as well as <code>&lt;project&gt;/outputs/</code>, so they find each other’s files. Notebooks 01, 04 and 05
-  read the dataset zip from the same place: <code>MyDrive/archive.zip</code>.</div>
-  <div class="callout"><strong>Different notebooks can run in different Colab sessions.</strong> They do not share memory, only
-  files. A result is visible to the next notebook only if it is in a folder that notebook can see, which in practice
-  means Google Drive.</div>
+  <h2>6. Watch out on Kaggle</h2>
+  <div class="callout"><strong>Each Kaggle notebook has its own computer.</strong> Notebooks do not share memory or
+  folders. A result reaches the next notebook only through <strong>Save Version</strong> plus <strong>Add Input → Your Work</strong>.</div>
+  <div class="callout"><strong>Unsaved work is lost.</strong> <code>/kaggle/working/</code> (including the trained models in
+  <code>outputs/</code>) is kept only after <strong>Save Version → Save &amp; Run All (Commit)</strong>. That re-runs the whole
+  notebook from the top, so switch on <code>RUN_TRAINING</code> in notebook 05 before saving.</div>
+  <div class="callout"><strong>One version per input.</strong> Notebooks 03 and 04 attach one saved version of notebook 05.
+  Train every experiment you need in that one run, or use one copy of notebook 05 per experiment and attach them all.</div>
 
   <footer>Covers notebooks 01–05 and the <code>deepfake_kyc.train</code> / <code>deepfake_kyc.evaluate</code> scripts.
   Folder names come from <code>configs/base.yaml</code>; file names come from <code>src/deepfake_kyc/train.py</code> and
