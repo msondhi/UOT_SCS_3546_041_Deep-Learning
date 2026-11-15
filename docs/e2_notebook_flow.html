@@ -336,20 +336,49 @@ footer{
   </figure>
 
   <h2>3. Where E2 sits in the experiment plan</h2>
+  <p class="section-note"><strong>Words used in the table.</strong>
+  <strong>Clean</strong> = the original real and fake images, with no damage added.
+  <strong>Degradation-aware training</strong> = training with damaged photos: each training photo (real or fake) has a
+  50% chance of getting one random kind of damage (blur, JPEG, downscale, noise or screen capture) at a random
+  severity 1–5, made on the fly. It does <em>not</em> mean "no damaged photos"; it means the model is shown damaged
+  photos while it learns, so it gets used to poor-quality uploads. The validation photos always stay clean
+  (real and fake images).</p>
   <div class="table-wrap">
   <table class="roadmap">
-    <caption>From the project's experiment plan — E1 already exists, E2 is this notebook, E3–E6 come after.</caption>
-    <thead><tr><th>Exp</th><th>Model</th><th>What changes vs. E2</th></tr></thead>
+    <caption>The project's experiment plan. All six are trained and tested on real and fake faces; they differ in one setting each.</caption>
+    <thead><tr><th>Exp</th><th>Model</th><th>What changes vs. E2</th><th>Trained on</th><th>Tested on</th></tr></thead>
     <tbody>
-      <tr><td>E1</td><td>SimpleCNN</td><td>trained from scratch, no pretrained weights</td></tr>
-      <tr class="current"><td>E2</td><td>EfficientNet-B0</td><td>frozen pretrained backbone, train only the head (this notebook)</td></tr>
-      <tr><td>E3</td><td>EfficientNet-B0</td><td>full fine-tune of the whole backbone, lower learning rate</td></tr>
-      <tr><td>E4</td><td>EfficientNet-B0</td><td>gradual unfreezing of backbone layers</td></tr>
-      <tr><td>E5</td><td>ResNet-50</td><td>different backbone architecture</td></tr>
-      <tr><td>E6</td><td>EfficientNet-B0</td><td>degradation-aware training (blur, JPEG, noise, screen capture)</td></tr>
+      <tr><td>E1</td><td>SimpleCNN</td><td>trained from scratch, no pretrained weights</td><td>clean (real and fake images) + damaged: degradation-aware</td><td>clean (real and fake images) + all 25 kinds/severities of damage</td></tr>
+      <tr class="current"><td>E2</td><td>EfficientNet-B0</td><td>frozen pretrained backbone, train only the head (this notebook)</td><td>clean (real and fake images) + damaged: degradation-aware</td><td>clean (real and fake images) + all 25 kinds/severities of damage</td></tr>
+      <tr><td>E3</td><td>EfficientNet-B0</td><td>full fine-tune of the whole backbone, lower learning rate (main model)</td><td>clean (real and fake images) + damaged: degradation-aware</td><td>clean (real and fake images) + all 25 kinds/severities of damage</td></tr>
+      <tr><td>E4</td><td>EfficientNet-B0</td><td>like E3, but the backbone is frozen for the first epoch</td><td>clean (real and fake images) + damaged: degradation-aware</td><td>clean (real and fake images) + all 25 kinds/severities of damage</td></tr>
+      <tr><td>E5</td><td>ResNet-50</td><td>like E3, but a different backbone architecture</td><td>clean (real and fake images) + damaged: degradation-aware</td><td>clean (real and fake images) + all 25 kinds/severities of damage</td></tr>
+      <tr><td>E6</td><td>EfficientNet-B0</td><td>like E3, but <strong>no</strong> degradation-aware training: the control</td><td>clean only (real and fake images), no damaged photos</td><td>clean (real and fake images) by default; set <code>INCLUDE_DAMAGE = True</code> in notebook 03 to also test it on damage and compare with E3</td></tr>
     </tbody>
   </table>
   </div>
+  <p class="section-note">Why E6 exists: E3 and E6 are identical except for damage during training. Testing both on the
+  same damaged photos shows whether degradation-aware training really makes the model more robust.</p>
+
+  <div class="table-wrap">
+  <table class="roadmap">
+    <caption>The actual settings, read from the config files (<code>configs/base.yaml</code> plus each file in <code>configs/experiments/</code>).</caption>
+    <thead><tr><th>Exp</th><th>Model</th><th>Pretrained</th><th>Batch</th><th>Epochs</th><th>LR</th><th>Warm-up</th><th>Frozen epochs</th><th>Early stop</th><th>Damage in training</th></tr></thead>
+    <tbody>
+      <tr><td>E1</td><td><code>simple_cnn</code></td><td>no</td><td>64</td><td>10</td><td>0.001</td><td>1</td><td>0</td><td>3</td><td>yes</td></tr>
+      <tr class="current"><td>E2</td><td><code>efficientnet_b0</code></td><td>yes</td><td>64</td><td>5</td><td>0.001</td><td>1</td><td>all</td><td>2</td><td>yes</td></tr>
+      <tr><td>E3</td><td><code>efficientnet_b0</code></td><td>yes</td><td>64</td><td>5</td><td>0.0003</td><td>1</td><td>0</td><td>2</td><td>yes</td></tr>
+      <tr><td>E4</td><td><code>efficientnet_b0</code></td><td>yes</td><td>64</td><td>5</td><td>0.0003</td><td>0</td><td>1</td><td>2</td><td>yes</td></tr>
+      <tr><td>E5</td><td><code>resnet50</code></td><td>yes</td><td>32</td><td>5</td><td>0.0003</td><td>1</td><td>0</td><td>2</td><td>yes</td></tr>
+      <tr><td>E6</td><td><code>efficientnet_b0</code></td><td>yes</td><td>64</td><td>5</td><td>0.0003</td><td>1</td><td>0</td><td>2</td><td>no</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="section-note"><strong>How to read it.</strong> LR = learning rate of the new last layer; the pretrained
+  backbone learns 10× slower (E1 has no pretrained part). Warm-up = epochs in which the learning rate rises slowly from 0.
+  Frozen epochs = epochs in which the backbone does not learn (E2: the whole run). Early stop = training stops if the
+  validation loss has not improved for this many epochs in a row; the best epoch is kept. All experiments use seed 42,
+  AdamW, dropout 0.2, 224×224 images and mixed precision on a GPU.</p>
 
   <footer>
     Validation results only — the test split stays untouched until a model is chosen, and the final-evaluation cell refuses to overwrite an existing <code>eval_test.csv</code>. This is a research classifier for examples in a benchmark dataset; it does not establish identity or prove fraud on its own.
