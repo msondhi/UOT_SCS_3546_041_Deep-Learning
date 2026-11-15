@@ -10,7 +10,7 @@ Notebooks (how they share files through `data/raw/` and `outputs/`: [docs/2_note
 | `02_degradations_gallery.ipynb` | Show one face under every degradation at severities 1-5 (good report figure) |
 | `03_results_charts.ipynb` | Load `outputs/*/eval_test.csv` and draw the robustness charts and results tables |
 | `04_error_analysis.ipynb` | Browse false positives and false negatives, with Grad-CAM |
-| `05_next_architecture_effnet_b0.ipynb` | Train E2 (frozen EfficientNet-B0), Colab-ready: get the data from Drive or Kaggle, check the model, opt-in quick or full training, loss chart, and a once-only final test score |
+| `05_next_architecture_effnet_b0.ipynb` | Train any experiment(s) E1-E6 (choose `EXPERIMENTS` in Step 2; each is saved in its own `outputs/<experiment>/` folder and never overwritten), Colab/Kaggle-ready: get the data from Drive or Kaggle, check the model, opt-in quick or full training, loss chart, and a once-only final test score |
 
 ## Running the notebooks on Kaggle
 
@@ -32,7 +32,8 @@ How the notebooks share results on Kaggle:
 | Trained models and scores | `/kaggle/working/UOT_SCS_3546_041_Deep-Learning/outputs/<experiment>/` |
 
 `/kaggle/working/` is kept only when you click **Save Version → Save & Run All (Commit)**: Kaggle runs the
-notebook again from the top and stores its files. So in notebook 05 set `RUN_TRAINING = True` before saving.
+notebook again from the top and stores its files. So in notebook 05 choose `EXPERIMENTS` and set `RUN_TRAINING = True` before saving. Train all the experiments
+you need in that one run: a new version keeps only its own files, and notebooks 03/04 attach one version.
 Then, in notebooks 03 and 04, **Add Input → Your Work →** your saved notebook 05: its `outputs/` folder appears
 read-only under `/kaggle/input/`, and the notebooks find the models there. New score files from notebook 03 are
 written to its own `/kaggle/working/.../outputs/`, because inputs are read-only.

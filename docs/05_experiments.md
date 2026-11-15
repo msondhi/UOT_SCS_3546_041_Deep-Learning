@@ -16,7 +16,7 @@ All experiments train on real and fake faces with degradation-aware augmentation
 | E6 | `06_effnet_clean.yaml` | Control: E3 trained on clean photos only. Does degradation-aware training improve robustness? | E3 |
 | E7 | E3 with `--set` subsets | How much data do we need? | E3 |
 
-E2's notebook walkthrough is `notebooks/05_next_architecture_effnet_b0.ipynb`; see [docs/e2_notebook_flow.html](e2_notebook_flow.html) for a diagram of that notebook's flow and the frozen-backbone model architecture.
+`notebooks/05_next_architecture_effnet_b0.ipynb` trains any of E1-E6 from the notebook (choose them in `EXPERIMENTS`, Step 2; each experiment is saved in its own `outputs/<experiment_name>/` folder, and finished models are never overwritten unless `OVERWRITE = True`). [docs/e2_notebook_flow.html](e2_notebook_flow.html) still shows the original E2-only version of that notebook and the frozen-backbone model architecture.
 
 ## How to run
 
