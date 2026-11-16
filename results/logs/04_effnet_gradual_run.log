@@ -1,8 +1,0 @@
-Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
-Experiment 04_effnet_gradual on mps -> outputs/04_effnet_gradual
-Train images: 100000  Val images: 20000
-epoch=1  backbone_frozen=True  train_loss=2.21024  val_loss=1.43718  val_accuracy=0.6368  val_f1=0.63243  val_roc_auc=0.69296  seconds=489.3
-epoch=2  backbone_frozen=False  train_loss=0.53439  val_loss=0.14134  val_accuracy=0.95845  val_f1=0.95747  val_roc_auc=0.99416  seconds=1527.4
-epoch=3  backbone_frozen=False  train_loss=0.15253  val_loss=0.05849  val_accuracy=0.9805  val_f1=0.98039  val_roc_auc=0.99839  seconds=3858.5
-epoch=4  backbone_frozen=False  train_loss=0.09805  val_loss=0.0539  val_accuracy=0.9821  val_f1=0.98192  val_roc_auc=0.99891  seconds=6296.5
-  warnings.warn('resource_tracker: There appear to be %d '

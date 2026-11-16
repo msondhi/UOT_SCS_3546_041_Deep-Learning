@@ -1,9 +1,0 @@
-Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
-Experiment 07_effnet_n1000 on mps -> outputs/07_effnet_n1000
-Train images: 1000  Val images: 20000
-epoch=1  backbone_frozen=False  train_loss=3.19705  val_loss=3.25793  val_accuracy=0.53685  val_f1=0.6485  val_roc_auc=0.54942  seconds=205.5
-epoch=2  backbone_frozen=False  train_loss=2.30742  val_loss=2.09088  val_accuracy=0.61165  val_f1=0.67652  val_roc_auc=0.6709  seconds=1367.1
-epoch=3  backbone_frozen=False  train_loss=1.78148  val_loss=1.67141  val_accuracy=0.6416  val_f1=0.68154  val_roc_auc=0.70616  seconds=2276.8
-epoch=4  backbone_frozen=False  train_loss=1.47016  val_loss=1.54678  val_accuracy=0.65505  val_f1=0.68282  val_roc_auc=0.71719  seconds=17834.6
-epoch=5  backbone_frozen=False  train_loss=1.27028  val_loss=1.5244  val_accuracy=0.65775  val_f1=0.68244  val_roc_auc=0.71998  seconds=21257.1
-Best epoch 5: val_loss=1.5244 val_accuracy=0.65775
