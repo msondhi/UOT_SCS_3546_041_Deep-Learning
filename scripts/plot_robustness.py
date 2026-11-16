@@ -4,8 +4,8 @@ Reads the CSVs written by ``deepfake_kyc.evaluate --degradation all`` and draws 
 line per model. Example:
 
     .venv/bin/python scripts/plot_robustness.py \
-        --run "Damage-aware training (E3)=outputs/03_effnet_finetune/eval_val_robustness.csv" \
-        --run "Clean training only (E6)=outputs/06_effnet_clean/eval_val_robustness.csv" \
+        --run "Standard training (E3)=outputs/03_effnet_finetune/eval_val_robustness.csv" \
+        --run "Robust training (E6)=outputs/06_effnet_robust/eval_val_robustness.csv" \
         --output outputs/figures/robustness_val.png
 """
 

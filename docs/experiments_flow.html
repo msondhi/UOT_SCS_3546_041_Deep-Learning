@@ -1,0 +1,794 @@
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Experiment Model Flows</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* layout: one scrolling column: notebook flow, one model diagram per experiment, then the plan tables */
+:root{
+  --bg:#f3f4f6;
+  --surface:#ffffff;
+  --border:#d7dae0;
+  --fg:#1b2430;
+  --muted-fg:#5b6472;
+  --accent:#2f6f6b;
+  --warn:#9a5a16;
+  --warn-fill:#f1ddbd;
+  --frozen-fill:#dde1e7;
+  --slow-fill:#bfe0dc;
+  --damage:#b4472f;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#11151c;
+    --surface:#1a2029;
+    --border:#2b333f;
+    --fg:#e7eaf0;
+    --muted-fg:#9aa5b4;
+    --accent:#5fd1c9;
+    --warn:#e2a24d;
+    --warn-fill:#3a2f1c;
+    --frozen-fill:#2c3440;
+    --slow-fill:#21504c;
+    --damage:#f08a6e;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11151c;
+  --surface:#1a2029;
+  --border:#2b333f;
+  --fg:#e7eaf0;
+  --muted-fg:#9aa5b4;
+  --accent:#5fd1c9;
+  --warn:#e2a24d;
+  --warn-fill:#3a2f1c;
+  --frozen-fill:#2c3440;
+  --slow-fill:#21504c;
+  --damage:#f08a6e;
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--fg);
+  font-family:'Inter',system-ui,sans-serif;
+  font-size:15px;
+  line-height:1.55;
+  padding-left:max(16px, env(safe-area-inset-left,0px));
+  padding-right:max(16px, env(safe-area-inset-right,0px));
+  padding-block:32px;
+}
+main{max-width:920px;margin:0 auto}
+.eyebrow{
+  font-family:'JetBrains Mono',monospace;
+  font-size:12px;
+  color:var(--muted-fg);
+  letter-spacing:.02em;
+  word-break:break-all;
+}
+h1{
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;
+  font-size:clamp(26px,4.5vw,34px);
+  margin:.3em 0 .2em;
+  text-wrap:balance;
+}
+p.lede{color:var(--muted-fg);max-width:65ch;margin:0 0 1.8em}
+h2{
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;
+  font-size:19px;
+  margin:2.4em 0 .2em;
+  text-wrap:balance;
+}
+p.section-note{color:var(--muted-fg);max-width:70ch;margin:.3em 0 1em;font-size:14px}
+figure{margin:0;padding:0}
+figure.diagram{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:14px;
+  overflow-x:auto;
+}
+figure.diagram svg{display:block;width:100%;height:auto;min-width:640px}
+figcaption{
+  color:var(--muted-fg);
+  font-size:13px;
+  margin-top:.6em;
+  max-width:72ch;
+}
+code{font-family:'JetBrains Mono',monospace;font-size:.92em}
+.legend{
+  display:flex;gap:18px;flex-wrap:wrap;
+  font-size:12px;color:var(--muted-fg);
+  margin-top:10px;
+}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.swatch{width:12px;height:12px;border-radius:3px;display:inline-block;flex:none}
+table.roadmap{
+  width:100%;border-collapse:collapse;font-size:13.5px;margin-top:.6em;
+  min-width:520px;
+}
+table.roadmap caption{text-align:left;color:var(--muted-fg);font-size:13px;margin-bottom:6px}
+table.roadmap th,table.roadmap td{
+  text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);
+  vertical-align:top;
+}
+table.roadmap th{font-family:'Space Grotesk',sans-serif;font-weight:500;color:var(--muted-fg);font-size:12px;letter-spacing:.03em;text-transform:uppercase}
+table.roadmap tr.current td{background:color-mix(in srgb, var(--accent) 12%, transparent)}
+table.roadmap tr.current td:first-child{font-weight:600;color:var(--accent)}
+.table-wrap{overflow-x:auto}
+footer{
+  margin-top:2.6em;padding-top:1.2em;border-top:1px solid var(--border);
+  color:var(--muted-fg);font-size:12.5px;max-width:72ch;
+}
+
+h3{
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;
+  font-size:16px;
+  margin:0 0 .15em;
+}
+.exp{margin:1.6em 0 0}
+.exp .tag{
+  display:inline-block;font-family:'JetBrains Mono',monospace;font-size:11.5px;
+  color:var(--muted-fg);border:1px solid var(--border);border-radius:999px;padding:1px 9px;margin-left:6px;
+  vertical-align:2px;
+}
+.exp p.section-note{margin:.2em 0 .7em}
+.phase{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted-fg);margin:.9em 0 .3em}
+.legend-key{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--muted-fg);margin:.4em 0 0}
+.legend-key span{display:inline-flex;align-items:center;gap:6px}
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin:.4em 0 0;padding:0;list-style:none}
+.toc a{
+  display:inline-block;font-size:13px;color:var(--fg);text-decoration:none;
+  border:1px solid var(--border);background:var(--surface);border-radius:8px;padding:4px 10px;
+}
+.toc a:hover{border-color:var(--accent);color:var(--accent)}
+</style>
+
+<main>
+  <p class="eyebrow">notebooks/05_next_architecture_effnet_b0.ipynb · configs/experiments/</p>
+  <h1>Experiment model flows: E1–E6</h1>
+  <p class="lede">What notebook 05 runs and in what order (top), what each experiment's model computes on one face image
+  (middle), and the full experiment plan (bottom). Amber steps are opt-in and do nothing until you set a flag.</p>
+
+  <h2>1. What notebook 05 runs, step by step</h2>
+  <p class="section-note">The same notebook trains any experiment: choose them in <code>EXPERIMENTS</code> (Step 2) and each
+  one is saved in its own <code>outputs/&lt;experiment&gt;/</code> folder. Everything up to the model check runs
+  automatically; training and the final test score only run when you switch them on.</p>
+
+  <figure class="diagram">
+    <svg viewBox="0 0 920 956" role="img" aria-label="Flowchart of notebook 05: get the project, choose experiments, check the dataset, choose the output folder, look at photos, build and check each model, then two opt-in steps for training and the final test score, ending with notebooks 03 and 04.">
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+        </marker>
+      </defs>
+      <style>
+        text{font-family:'Inter',system-ui,sans-serif;fill:currentColor}
+        .title{font-size:13px;font-weight:600}
+        .sub{font-size:11px;fill:var(--muted-fg,#5b6472)}
+        .mono{font-family:'JetBrains Mono',monospace;font-size:10.5px;fill:var(--muted-fg,#5b6472)}
+        .node{fill:var(--surface,#fff);stroke:currentColor;stroke-width:1.2}
+        .pod{fill:var(--surface,#fff);stroke:currentColor;stroke-width:1;stroke-dasharray:4 3}
+        .opt{stroke:var(--warn,#9a5a16);stroke-width:1.6}
+        .optfill{fill:var(--warn-fill,#f1ddbd)}
+        .flow{stroke:currentColor;stroke-width:1.4;fill:none;marker-end:url(#arrow)}
+        .branch{stroke:currentColor;stroke-width:1;fill:none;stroke-dasharray:4 3;marker-end:url(#arrow)}
+      </style>
+      <rect class="node" x="250" y="20" width="420" height="58" rx="8"/>
+      <text class="title" x="460" y="44" text-anchor="middle">Step 1 · Get the project and the tools</text>
+      <text class="mono" x="460" y="62" text-anchor="middle">clone from GitHub · find dataset · install timm … · GPU?</text>
+      <line class="flow" x1="460" y1="78" x2="460" y2="112"/>
+      <rect class="node" x="250" y="112" width="420" height="58" rx="8"/>
+      <text class="title" x="460" y="136" text-anchor="middle">Step 2 · Choose EXPERIMENTS, read settings</text>
+      <text class="mono" x="460" y="154" text-anchor="middle">configs/base.yaml + configs/experiments/<name>.yaml</text>
+      <line class="flow" x1="460" y1="170" x2="460" y2="204"/>
+      <rect class="node" x="250" y="204" width="420" height="58" rx="8"/>
+      <text class="title" x="460" y="228" text-anchor="middle">Step 3 · Check the dataset</text>
+      <text class="mono" x="460" y="246" text-anchor="middle">train / valid / test, real + fake → DATA_AVAILABLE</text>
+      <line class="flow" x1="460" y1="262" x2="460" y2="296"/>
+      <rect class="node" x="250" y="296" width="420" height="58" rx="8"/>
+      <text class="title" x="460" y="320" text-anchor="middle">Step 4 · Where models are saved</text>
+      <text class="mono" x="460" y="338" text-anchor="middle">outputs/<experiment>/  (one folder each)</text>
+      <line class="flow" x1="460" y1="354" x2="460" y2="388"/>
+      <rect class="pod" x="250" y="388" width="420" height="58" rx="8"/>
+      <text class="title" x="460" y="412" text-anchor="middle">Step 5 · Look at a few training photos</text>
+      <text class="mono" x="460" y="430" text-anchor="middle">3 real + 3 fake, only if the data is there</text>
+      <line class="flow" x1="460" y1="446" x2="460" y2="480"/>
+      <rect class="node" x="250" y="480" width="420" height="58" rx="8"/>
+      <text class="title" x="460" y="504" text-anchor="middle">Step 6 · Build each model and check it</text>
+      <text class="mono" x="460" y="522" text-anchor="middle">freeze if E2/E4 · count weights · output shape (2, 1)</text>
+      <line class="flow" x1="460" y1="538" x2="460" y2="572"/>
+      <rect class="node opt optfill" x="250" y="572" width="420" height="58" rx="8"/>
+      <text class="title" x="460" y="596" text-anchor="middle">OPT-IN · Step 7 · Train</text>
+      <text class="mono" x="460" y="614" text-anchor="middle">RUN_TRAINING · QUICK_RUN (1,000 photos) or full · OVERWRITE</text>
+      <line class="flow" x1="460" y1="630" x2="460" y2="664"/>
+      <text class="mono" x="470" y="652" font-size="10">writes best.pt · config.yaml · history.csv · summary.json</text>
+      <rect class="node" x="250" y="664" width="420" height="58" rx="8"/>
+      <text class="title" x="460" y="688" text-anchor="middle">Step 8 · Read the training results</text>
+      <text class="mono" x="460" y="706" text-anchor="middle">summary.json · history.csv · loss chart per experiment</text>
+      <line class="flow" x1="460" y1="722" x2="460" y2="756"/>
+      <rect class="node opt optfill" x="250" y="756" width="420" height="58" rx="8"/>
+      <text class="title" x="460" y="780" text-anchor="middle">OPT-IN, once · Step 9 · Test score</text>
+      <text class="mono" x="460" y="798" text-anchor="middle">RUN_TEST · clean test; E3 and E6 also get 25 damage tests</text>
+      <line class="flow" x1="460" y1="814" x2="460" y2="848"/>
+      <text class="mono" x="470" y="836" font-size="10">writes eval_test.csv</text>
+      <rect class="node" x="250" y="848" width="420" height="58" rx="8"/>
+      <text class="title" x="460" y="872" text-anchor="middle">Next: notebooks 03 and 04</text>
+      <text class="mono" x="460" y="890" text-anchor="middle">compare all experiments · error analysis + Grad-CAM</text>
+      <rect x="30" y="923" width="14" height="14" rx="3" class="optfill opt"/>
+      <text x="52" y="934" font-size="11" class="sub">opt-in step, off until you set its flag</text>
+      <line x1="300" y1="930" x2="340" y2="930" class="branch"/>
+      <text x="348" y="934" font-size="11" class="sub">runs only if the data is there</text>
+    </svg>
+    <div class="legend">
+      <span><span class="swatch" style="background:var(--warn-fill);border:1px solid var(--warn)"></span>opt-in: set the flag in the notebook</span>
+      <span><span class="swatch" style="border:1px dashed var(--muted-fg);background:transparent"></span>runs only if the dataset is attached</span>
+    </div>
+    <figcaption>Steps 7 and 9 are deliberately opt-in, so a run never starts hours of GPU training or uses up the test set
+    by accident. Step 7 never replaces a finished model unless <code>OVERWRITE = True</code>, and Step 9 skips an
+    experiment that already has <code>eval_test.csv</code>.</figcaption>
+  </figure>
+
+  <h2>2. What each model computes on one image</h2>
+  <p class="section-note">Every experiment uses the same pipeline: a 224×224 face is normalized, turned into features by a
+  backbone, pooled into one number per feature, passed through dropout and a new one-output linear head, and a sigmoid turns
+  that score into <code>P(fake)</code>. Training minimizes <code>BCEWithLogitsLoss</code> with AdamW. What differs is the
+  backbone, which parts learn, how fast, and (E6 only) what the training photos look like.</p>
+  <ul class="toc">
+    <li><a href="#e1">E1 · Baseline CNN</a></li>
+    <li><a href="#e2">E2 · Frozen</a></li>
+    <li><a href="#e3">E3 · Fine-tune</a></li>
+    <li><a href="#e4">E4 · Gradual</a></li>
+    <li><a href="#e5">E5 · ResNet-50</a></li>
+    <li><a href="#e6">E6 · Robust</a></li>
+    <li><a href="#plan">Experiment plan</a></li>
+  </ul>
+  <div class="legend-key">
+    <span><span class="swatch" style="background:var(--frozen-fill);border:1px solid var(--fg)"></span>frozen: pretrained weights do not change</span>
+    <span><span class="swatch" style="background:var(--slow-fill);border:1px solid var(--fg)"></span>learns slowly: 10× lower learning rate</span>
+    <span><span class="swatch" style="background:var(--accent);border:1px solid var(--fg)"></span>learns at the full learning rate</span>
+    <span><span class="swatch" style="border:1.5px dashed var(--damage);background:transparent"></span>random damage, E6 training only</span>
+  </div>
+
+  <div class="table-wrap">
+  <table class="roadmap">
+    <caption>At a glance. LR = learning rate. Numbers are counted from the project's model code.</caption>
+    <thead><tr><th>Exp</th><th>Backbone (start)</th><th>Weights that learn</th><th>Head LR</th><th>Backbone LR</th><th>Frozen epochs</th><th>Training photos</th></tr></thead>
+    <tbody>
+      <tr><td><a href="#e1">E1</a></td><td>SimpleCNN (random start)</td><td>388,896 + 257</td><td>0.001</td><td>0.001 (same)</td><td>0</td><td>clean</td></tr>
+      <tr><td><a href="#e2">E2</a></td><td>EfficientNet-B0 (ImageNet)</td><td>1,281 (head only)</td><td>0.001</td><td>— frozen</td><td>all</td><td>clean</td></tr>
+      <tr><td><a href="#e3">E3</a></td><td>EfficientNet-B0 (ImageNet)</td><td>4,008,829 (all)</td><td>0.0003</td><td>0.00003</td><td>0</td><td>clean</td></tr>
+      <tr><td><a href="#e4">E4</a></td><td>EfficientNet-B0 (ImageNet)</td><td>1,281, then all</td><td>0.0003</td><td>0.00003 from epoch 2</td><td>1</td><td>clean</td></tr>
+      <tr><td><a href="#e5">E5</a></td><td>ResNet-50 (ImageNet)</td><td>23,510,081 (all)</td><td>0.0003</td><td>0.00003</td><td>0</td><td>clean</td></tr>
+      <tr><td><a href="#e6">E6</a></td><td>EfficientNet-B0 (ImageNet)</td><td>4,008,829 (all)</td><td>0.0003</td><td>0.00003</td><td>0</td><td>clean + 50% damaged</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <section class="exp" id="e1">
+    <h3>E1 · Baseline CNN trained from scratch<span class="tag">01_baseline_cnn.yaml</span></h3>
+    <p class="section-note">No pretrained knowledge: a small 4-block CNN starts from random weights and learns everything from the 100,000 training faces. It answers how far a network gets with no prior knowledge.</p>
+    <figure class="diagram">
+<svg viewBox="0 0 1180 212" role="img" aria-label="E1 forward pass: a 224 by 224 face image is normalized, passed through the SimpleCNN 4 conv blocks (random start · 388,896 weights, learns · lr 0.001), pooled into 256 values, passed through dropout and the new linear head (256 → 1, 257 weights, learns · lr 0.001), then a sigmoid gives P(fake).">
+      <defs>
+        <marker id="a-e10" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+        </marker>
+      </defs>
+      <style>
+        text{font-family:'Inter',system-ui,sans-serif;fill:currentColor}
+        .t{font-size:12.5px;font-weight:600;text-anchor:middle}
+        .s{font-size:10.5px;fill:var(--muted-fg,#5b6472);text-anchor:middle}
+        .box{stroke:currentColor;stroke-width:1.2}
+        .arr-e10{stroke:currentColor;stroke-width:1.4;fill:none;marker-end:url(#a-e10)}
+        .train{fill:none;stroke:var(--muted-fg,#5b6472);stroke-width:1;stroke-dasharray:4 3}
+        .dmg{fill:none;stroke:var(--damage,#b4472f);stroke-width:1.6;stroke-dasharray:5 3}
+      </style>
+      <rect class="train" x="10" y="12" width="270" height="62" rx="8"/>
+      <text class="t" x="145" y="38">random crop · flip · colour jitter</text>
+      <text class="s" x="145" y="56">clean photos, no damage added</text>
+      <text class="s" x="290" y="30" text-anchor="start" style="text-anchor:start">training only</text>
+      <text class="s" x="290" y="44" text-anchor="start" style="text-anchor:start">(validation / test: resize only)</text>
+      <line class="arr-e10" x1="70" y1="74" x2="70" y2="98" stroke-dasharray="4 3"/>
+      <rect class="box" x="10" y="100" width="120" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="70" y="145.5" fill="currentColor" style="fill:currentColor">RGB face</text>
+      <text class="s" x="70" y="161.5">224×224×3</text>
+      <line class="arr-e10" x1="130" y1="150" x2="148" y2="150"/>
+      <rect class="box" x="150" y="100" width="130" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="215" y="137" fill="currentColor" style="fill:currentColor">ImageNet</text>
+      <text class="t" x="215" y="154" fill="currentColor" style="fill:currentColor">normalize</text>
+      <text class="s" x="215" y="170">mean / std</text>
+      <line class="arr-e10" x1="280" y1="150" x2="298" y2="150"/>
+      <rect class="box" x="300" y="100" width="220" height="100" rx="8" fill="var(--accent)"/>
+      <text class="t" x="410" y="128.5" fill="var(--surface)" style="fill:var(--surface)">SimpleCNN</text>
+      <text class="t" x="410" y="145.5" fill="var(--surface)" style="fill:var(--surface)">4 conv blocks</text>
+      <text class="s" x="410" y="161.5" style="fill:var(--surface);opacity:.9">random start · 388,896 weights</text>
+      <text class="s" x="410" y="178.5" style="fill:var(--surface);opacity:.9">learns · lr 0.001</text>
+      <line class="arr-e10" x1="520" y1="150" x2="538" y2="150"/>
+      <rect class="box" x="540" y="100" width="120" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="600" y="137" fill="currentColor" style="fill:currentColor">Pooled</text>
+      <text class="t" x="600" y="154" fill="currentColor" style="fill:currentColor">features</text>
+      <text class="s" x="600" y="170">256 values</text>
+      <line class="arr-e10" x1="660" y1="150" x2="678" y2="150"/>
+      <rect class="box" x="680" y="100" width="90" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="725" y="145.5" fill="currentColor" style="fill:currentColor">Dropout</text>
+      <text class="s" x="725" y="161.5">0.2</text>
+      <line class="arr-e10" x1="770" y1="150" x2="788" y2="150"/>
+      <rect class="box" x="790" y="100" width="130" height="100" rx="8" fill="var(--accent)"/>
+      <text class="t" x="855" y="120" fill="var(--surface)" style="fill:var(--surface)">Linear</text>
+      <text class="t" x="855" y="137" fill="var(--surface)" style="fill:var(--surface)">head</text>
+      <text class="s" x="855" y="153" style="fill:var(--surface);opacity:.9">256 → 1</text>
+      <text class="s" x="855" y="170" style="fill:var(--surface);opacity:.9">257 weights</text>
+      <text class="s" x="855" y="187" style="fill:var(--surface);opacity:.9">learns · lr 0.001</text>
+      <line class="arr-e10" x1="920" y1="150" x2="938" y2="150"/>
+      <rect class="box" x="940" y="100" width="80" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="980" y="154" fill="currentColor" style="fill:currentColor">Sigmoid</text>
+      <line class="arr-e10" x1="1020" y1="150" x2="1038" y2="150"/>
+      <rect class="box" x="1040" y="100" width="130" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="1105" y="137" fill="currentColor" style="fill:currentColor">P(fake)</text>
+      <text class="s" x="1105" y="153">≥ 0.5 → fake</text>
+      <text class="s" x="1105" y="170">&lt; 0.5 → real</text>
+    </svg>
+    <figcaption>Each block is a 3×3 convolution → BatchNorm → ReLU → 2×2 max-pool, with 32, 64, 128 and 256 channels, so the image shrinks 224 → 112 → 56 → 28 → 14 and ends as 14×14×256 before pooling. Everything learns at the same rate (<code>backbone_lr_mult: 1.0</code>), for up to 10 epochs (early stop after 3 without improvement). About 389,000 weights in total, roughly 10× fewer than EfficientNet-B0.</figcaption>
+    </figure>
+  </section>
+  <section class="exp" id="e2">
+    <h3>E2 · EfficientNet-B0, frozen backbone<span class="tag">02_effnet_frozen.yaml</span></h3>
+    <p class="section-note">The pretrained backbone is used as a fixed feature extractor: only the new one-output head learns. It answers whether features learned on everyday ImageNet photos are enough on their own.</p>
+    <figure class="diagram">
+<svg viewBox="0 0 1180 212" role="img" aria-label="E2 forward pass: a 224 by 224 face image is normalized, passed through the EfficientNet-B0 backbone (pretrained · 4,007,548 weights, frozen for the whole run), pooled into 1,280 values, passed through dropout and the new linear head (1,280 → 1, 1,281 weights, learns · lr 0.001), then a sigmoid gives P(fake).">
+      <defs>
+        <marker id="a-e20" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+        </marker>
+      </defs>
+      <style>
+        text{font-family:'Inter',system-ui,sans-serif;fill:currentColor}
+        .t{font-size:12.5px;font-weight:600;text-anchor:middle}
+        .s{font-size:10.5px;fill:var(--muted-fg,#5b6472);text-anchor:middle}
+        .box{stroke:currentColor;stroke-width:1.2}
+        .arr-e20{stroke:currentColor;stroke-width:1.4;fill:none;marker-end:url(#a-e20)}
+        .train{fill:none;stroke:var(--muted-fg,#5b6472);stroke-width:1;stroke-dasharray:4 3}
+        .dmg{fill:none;stroke:var(--damage,#b4472f);stroke-width:1.6;stroke-dasharray:5 3}
+      </style>
+      <rect class="train" x="10" y="12" width="270" height="62" rx="8"/>
+      <text class="t" x="145" y="38">random crop · flip · colour jitter</text>
+      <text class="s" x="145" y="56">clean photos, no damage added</text>
+      <text class="s" x="290" y="30" text-anchor="start" style="text-anchor:start">training only</text>
+      <text class="s" x="290" y="44" text-anchor="start" style="text-anchor:start">(validation / test: resize only)</text>
+      <line class="arr-e20" x1="70" y1="74" x2="70" y2="98" stroke-dasharray="4 3"/>
+      <rect class="box" x="10" y="100" width="120" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="70" y="145.5" fill="currentColor" style="fill:currentColor">RGB face</text>
+      <text class="s" x="70" y="161.5">224×224×3</text>
+      <line class="arr-e20" x1="130" y1="150" x2="148" y2="150"/>
+      <rect class="box" x="150" y="100" width="130" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="215" y="137" fill="currentColor" style="fill:currentColor">ImageNet</text>
+      <text class="t" x="215" y="154" fill="currentColor" style="fill:currentColor">normalize</text>
+      <text class="s" x="215" y="170">mean / std</text>
+      <line class="arr-e20" x1="280" y1="150" x2="298" y2="150"/>
+      <rect class="box" x="300" y="100" width="220" height="100" rx="8" fill="var(--frozen-fill)"/>
+      <text class="t" x="410" y="128.5" fill="currentColor" style="fill:currentColor">EfficientNet-B0</text>
+      <text class="t" x="410" y="145.5" fill="currentColor" style="fill:currentColor">backbone</text>
+      <text class="s" x="410" y="161.5">pretrained · 4,007,548 weights</text>
+      <text class="s" x="410" y="178.5">frozen for the whole run</text>
+      <line class="arr-e20" x1="520" y1="150" x2="538" y2="150"/>
+      <rect class="box" x="540" y="100" width="120" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="600" y="137" fill="currentColor" style="fill:currentColor">Pooled</text>
+      <text class="t" x="600" y="154" fill="currentColor" style="fill:currentColor">features</text>
+      <text class="s" x="600" y="170">1,280 values</text>
+      <line class="arr-e20" x1="660" y1="150" x2="678" y2="150"/>
+      <rect class="box" x="680" y="100" width="90" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="725" y="145.5" fill="currentColor" style="fill:currentColor">Dropout</text>
+      <text class="s" x="725" y="161.5">0.2</text>
+      <line class="arr-e20" x1="770" y1="150" x2="788" y2="150"/>
+      <rect class="box" x="790" y="100" width="130" height="100" rx="8" fill="var(--accent)"/>
+      <text class="t" x="855" y="120" fill="var(--surface)" style="fill:var(--surface)">New linear</text>
+      <text class="t" x="855" y="137" fill="var(--surface)" style="fill:var(--surface)">head</text>
+      <text class="s" x="855" y="153" style="fill:var(--surface);opacity:.9">1,280 → 1</text>
+      <text class="s" x="855" y="170" style="fill:var(--surface);opacity:.9">1,281 weights</text>
+      <text class="s" x="855" y="187" style="fill:var(--surface);opacity:.9">learns · lr 0.001</text>
+      <line class="arr-e20" x1="920" y1="150" x2="938" y2="150"/>
+      <rect class="box" x="940" y="100" width="80" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="980" y="154" fill="currentColor" style="fill:currentColor">Sigmoid</text>
+      <line class="arr-e20" x1="1020" y1="150" x2="1038" y2="150"/>
+      <rect class="box" x="1040" y="100" width="130" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="1105" y="137" fill="currentColor" style="fill:currentColor">P(fake)</text>
+      <text class="s" x="1105" y="153">≥ 0.5 → fake</text>
+      <text class="s" x="1105" y="170">&lt; 0.5 → real</text>
+    </svg>
+    <figcaption>Only 1,281 of 4,008,829 weights learn (<code>freeze_backbone_epochs: 999</code>, <code>lr: 1.0e-3</code>). Frozen means the backbone weights get no gradient updates; as in the original project setup, its BatchNorm running averages still adjust to the face photos while training. The original 1,000-class ImageNet layer (1,281,000 weights) is thrown away and replaced by the new head.</figcaption>
+    </figure>
+  </section>
+  <section class="exp" id="e3">
+    <h3>E3 · EfficientNet-B0, full fine-tuning (main model)<span class="tag">03_effnet_finetune.yaml</span></h3>
+    <p class="section-note">Every layer learns from the first step, but the pretrained backbone learns 10× more slowly than the new head so its ImageNet knowledge is adjusted gently rather than overwritten.</p>
+    <figure class="diagram">
+<svg viewBox="0 0 1180 212" role="img" aria-label="E3 forward pass: a 224 by 224 face image is normalized, passed through the EfficientNet-B0 backbone (pretrained · 4,007,548 weights, learns 10× slower · lr 0.00003), pooled into 1,280 values, passed through dropout and the new linear head (1,280 → 1, 1,281 weights, learns · lr 0.0003), then a sigmoid gives P(fake).">
+      <defs>
+        <marker id="a-e30" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+        </marker>
+      </defs>
+      <style>
+        text{font-family:'Inter',system-ui,sans-serif;fill:currentColor}
+        .t{font-size:12.5px;font-weight:600;text-anchor:middle}
+        .s{font-size:10.5px;fill:var(--muted-fg,#5b6472);text-anchor:middle}
+        .box{stroke:currentColor;stroke-width:1.2}
+        .arr-e30{stroke:currentColor;stroke-width:1.4;fill:none;marker-end:url(#a-e30)}
+        .train{fill:none;stroke:var(--muted-fg,#5b6472);stroke-width:1;stroke-dasharray:4 3}
+        .dmg{fill:none;stroke:var(--damage,#b4472f);stroke-width:1.6;stroke-dasharray:5 3}
+      </style>
+      <rect class="train" x="10" y="12" width="270" height="62" rx="8"/>
+      <text class="t" x="145" y="38">random crop · flip · colour jitter</text>
+      <text class="s" x="145" y="56">clean photos, no damage added</text>
+      <text class="s" x="290" y="30" text-anchor="start" style="text-anchor:start">training only</text>
+      <text class="s" x="290" y="44" text-anchor="start" style="text-anchor:start">(validation / test: resize only)</text>
+      <line class="arr-e30" x1="70" y1="74" x2="70" y2="98" stroke-dasharray="4 3"/>
+      <rect class="box" x="10" y="100" width="120" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="70" y="145.5" fill="currentColor" style="fill:currentColor">RGB face</text>
+      <text class="s" x="70" y="161.5">224×224×3</text>
+      <line class="arr-e30" x1="130" y1="150" x2="148" y2="150"/>
+      <rect class="box" x="150" y="100" width="130" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="215" y="137" fill="currentColor" style="fill:currentColor">ImageNet</text>
+      <text class="t" x="215" y="154" fill="currentColor" style="fill:currentColor">normalize</text>
+      <text class="s" x="215" y="170">mean / std</text>
+      <line class="arr-e30" x1="280" y1="150" x2="298" y2="150"/>
+      <rect class="box" x="300" y="100" width="220" height="100" rx="8" fill="var(--slow-fill)"/>
+      <text class="t" x="410" y="128.5" fill="currentColor" style="fill:currentColor">EfficientNet-B0</text>
+      <text class="t" x="410" y="145.5" fill="currentColor" style="fill:currentColor">backbone</text>
+      <text class="s" x="410" y="161.5">pretrained · 4,007,548 weights</text>
+      <text class="s" x="410" y="178.5">learns 10× slower · lr 0.00003</text>
+      <line class="arr-e30" x1="520" y1="150" x2="538" y2="150"/>
+      <rect class="box" x="540" y="100" width="120" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="600" y="137" fill="currentColor" style="fill:currentColor">Pooled</text>
+      <text class="t" x="600" y="154" fill="currentColor" style="fill:currentColor">features</text>
+      <text class="s" x="600" y="170">1,280 values</text>
+      <line class="arr-e30" x1="660" y1="150" x2="678" y2="150"/>
+      <rect class="box" x="680" y="100" width="90" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="725" y="145.5" fill="currentColor" style="fill:currentColor">Dropout</text>
+      <text class="s" x="725" y="161.5">0.2</text>
+      <line class="arr-e30" x1="770" y1="150" x2="788" y2="150"/>
+      <rect class="box" x="790" y="100" width="130" height="100" rx="8" fill="var(--accent)"/>
+      <text class="t" x="855" y="120" fill="var(--surface)" style="fill:var(--surface)">New linear</text>
+      <text class="t" x="855" y="137" fill="var(--surface)" style="fill:var(--surface)">head</text>
+      <text class="s" x="855" y="153" style="fill:var(--surface);opacity:.9">1,280 → 1</text>
+      <text class="s" x="855" y="170" style="fill:var(--surface);opacity:.9">1,281 weights</text>
+      <text class="s" x="855" y="187" style="fill:var(--surface);opacity:.9">learns · lr 0.0003</text>
+      <line class="arr-e30" x1="920" y1="150" x2="938" y2="150"/>
+      <rect class="box" x="940" y="100" width="80" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="980" y="154" fill="currentColor" style="fill:currentColor">Sigmoid</text>
+      <line class="arr-e30" x1="1020" y1="150" x2="1038" y2="150"/>
+      <rect class="box" x="1040" y="100" width="130" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="1105" y="137" fill="currentColor" style="fill:currentColor">P(fake)</text>
+      <text class="s" x="1105" y="153">≥ 0.5 → fake</text>
+      <text class="s" x="1105" y="170">&lt; 0.5 → real</text>
+    </svg>
+    <figcaption>All 4,008,829 weights learn. One warm-up epoch raises the learning rate from 0, then it falls along a cosine curve to 0 by epoch 5. Trained on clean photos; E3 is the <strong>standard</strong> model in the E3 vs. E6 robustness comparison, so it is also tested on the 25 damaged versions of the test set.</figcaption>
+    </figure>
+  </section>
+  <section class="exp" id="e4">
+    <h3>E4 · EfficientNet-B0, gradual unfreezing<span class="tag">04_effnet_gradual.yaml</span></h3>
+    <p class="section-note">Same model as E3, trained in two phases: the head first learns alone on top of the frozen backbone, then the whole network is fine-tuned. The idea: a random head cannot send useful gradients into the backbone at the start, so let it settle first.</p>
+    <figure class="diagram">
+    <p class="phase" style="margin-top:0">Epoch 1 · backbone frozen, head learns</p>
+<svg viewBox="0 0 1180 212" role="img" aria-label="E4 forward pass: a 224 by 224 face image is normalized, passed through the EfficientNet-B0 backbone (pretrained · 4,007,548 weights, frozen in epoch 1), pooled into 1,280 values, passed through dropout and the new linear head (1,280 → 1, 1,281 weights, learns · lr 0.0003), then a sigmoid gives P(fake).">
+      <defs>
+        <marker id="a-e40" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+        </marker>
+      </defs>
+      <style>
+        text{font-family:'Inter',system-ui,sans-serif;fill:currentColor}
+        .t{font-size:12.5px;font-weight:600;text-anchor:middle}
+        .s{font-size:10.5px;fill:var(--muted-fg,#5b6472);text-anchor:middle}
+        .box{stroke:currentColor;stroke-width:1.2}
+        .arr-e40{stroke:currentColor;stroke-width:1.4;fill:none;marker-end:url(#a-e40)}
+        .train{fill:none;stroke:var(--muted-fg,#5b6472);stroke-width:1;stroke-dasharray:4 3}
+        .dmg{fill:none;stroke:var(--damage,#b4472f);stroke-width:1.6;stroke-dasharray:5 3}
+      </style>
+      <rect class="train" x="10" y="12" width="270" height="62" rx="8"/>
+      <text class="t" x="145" y="38">random crop · flip · colour jitter</text>
+      <text class="s" x="145" y="56">clean photos, no damage added</text>
+      <text class="s" x="290" y="30" text-anchor="start" style="text-anchor:start">training only</text>
+      <text class="s" x="290" y="44" text-anchor="start" style="text-anchor:start">(validation / test: resize only)</text>
+      <line class="arr-e40" x1="70" y1="74" x2="70" y2="98" stroke-dasharray="4 3"/>
+      <rect class="box" x="10" y="100" width="120" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="70" y="145.5" fill="currentColor" style="fill:currentColor">RGB face</text>
+      <text class="s" x="70" y="161.5">224×224×3</text>
+      <line class="arr-e40" x1="130" y1="150" x2="148" y2="150"/>
+      <rect class="box" x="150" y="100" width="130" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="215" y="137" fill="currentColor" style="fill:currentColor">ImageNet</text>
+      <text class="t" x="215" y="154" fill="currentColor" style="fill:currentColor">normalize</text>
+      <text class="s" x="215" y="170">mean / std</text>
+      <line class="arr-e40" x1="280" y1="150" x2="298" y2="150"/>
+      <rect class="box" x="300" y="100" width="220" height="100" rx="8" fill="var(--frozen-fill)"/>
+      <text class="t" x="410" y="128.5" fill="currentColor" style="fill:currentColor">EfficientNet-B0</text>
+      <text class="t" x="410" y="145.5" fill="currentColor" style="fill:currentColor">backbone</text>
+      <text class="s" x="410" y="161.5">pretrained · 4,007,548 weights</text>
+      <text class="s" x="410" y="178.5">frozen in epoch 1</text>
+      <line class="arr-e40" x1="520" y1="150" x2="538" y2="150"/>
+      <rect class="box" x="540" y="100" width="120" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="600" y="137" fill="currentColor" style="fill:currentColor">Pooled</text>
+      <text class="t" x="600" y="154" fill="currentColor" style="fill:currentColor">features</text>
+      <text class="s" x="600" y="170">1,280 values</text>
+      <line class="arr-e40" x1="660" y1="150" x2="678" y2="150"/>
+      <rect class="box" x="680" y="100" width="90" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="725" y="145.5" fill="currentColor" style="fill:currentColor">Dropout</text>
+      <text class="s" x="725" y="161.5">0.2</text>
+      <line class="arr-e40" x1="770" y1="150" x2="788" y2="150"/>
+      <rect class="box" x="790" y="100" width="130" height="100" rx="8" fill="var(--accent)"/>
+      <text class="t" x="855" y="120" fill="var(--surface)" style="fill:var(--surface)">New linear</text>
+      <text class="t" x="855" y="137" fill="var(--surface)" style="fill:var(--surface)">head</text>
+      <text class="s" x="855" y="153" style="fill:var(--surface);opacity:.9">1,280 → 1</text>
+      <text class="s" x="855" y="170" style="fill:var(--surface);opacity:.9">1,281 weights</text>
+      <text class="s" x="855" y="187" style="fill:var(--surface);opacity:.9">learns · lr 0.0003</text>
+      <line class="arr-e40" x1="920" y1="150" x2="938" y2="150"/>
+      <rect class="box" x="940" y="100" width="80" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="980" y="154" fill="currentColor" style="fill:currentColor">Sigmoid</text>
+      <line class="arr-e40" x1="1020" y1="150" x2="1038" y2="150"/>
+      <rect class="box" x="1040" y="100" width="130" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="1105" y="137" fill="currentColor" style="fill:currentColor">P(fake)</text>
+      <text class="s" x="1105" y="153">≥ 0.5 → fake</text>
+      <text class="s" x="1105" y="170">&lt; 0.5 → real</text>
+    </svg>
+    <p class="phase" style="margin-top:.9em">Epochs 2–5 · everything learns</p>
+<svg viewBox="0 0 1180 212" role="img" aria-label="E4 forward pass: a 224 by 224 face image is normalized, passed through the EfficientNet-B0 backbone (unfrozen from epoch 2, learns 10× slower · lr 0.00003), pooled into 1,280 values, passed through dropout and the new linear head (1,280 → 1, 1,281 weights, learns · lr 0.0003), then a sigmoid gives P(fake).">
+      <defs>
+        <marker id="a-e41" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+        </marker>
+      </defs>
+      <style>
+        text{font-family:'Inter',system-ui,sans-serif;fill:currentColor}
+        .t{font-size:12.5px;font-weight:600;text-anchor:middle}
+        .s{font-size:10.5px;fill:var(--muted-fg,#5b6472);text-anchor:middle}
+        .box{stroke:currentColor;stroke-width:1.2}
+        .arr-e41{stroke:currentColor;stroke-width:1.4;fill:none;marker-end:url(#a-e41)}
+        .train{fill:none;stroke:var(--muted-fg,#5b6472);stroke-width:1;stroke-dasharray:4 3}
+        .dmg{fill:none;stroke:var(--damage,#b4472f);stroke-width:1.6;stroke-dasharray:5 3}
+      </style>
+      <rect class="train" x="10" y="12" width="270" height="62" rx="8"/>
+      <text class="t" x="145" y="38">random crop · flip · colour jitter</text>
+      <text class="s" x="145" y="56">clean photos, no damage added</text>
+      <text class="s" x="290" y="30" text-anchor="start" style="text-anchor:start">training only</text>
+      <text class="s" x="290" y="44" text-anchor="start" style="text-anchor:start">(validation / test: resize only)</text>
+      <line class="arr-e41" x1="70" y1="74" x2="70" y2="98" stroke-dasharray="4 3"/>
+      <rect class="box" x="10" y="100" width="120" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="70" y="145.5" fill="currentColor" style="fill:currentColor">RGB face</text>
+      <text class="s" x="70" y="161.5">224×224×3</text>
+      <line class="arr-e41" x1="130" y1="150" x2="148" y2="150"/>
+      <rect class="box" x="150" y="100" width="130" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="215" y="137" fill="currentColor" style="fill:currentColor">ImageNet</text>
+      <text class="t" x="215" y="154" fill="currentColor" style="fill:currentColor">normalize</text>
+      <text class="s" x="215" y="170">mean / std</text>
+      <line class="arr-e41" x1="280" y1="150" x2="298" y2="150"/>
+      <rect class="box" x="300" y="100" width="220" height="100" rx="8" fill="var(--slow-fill)"/>
+      <text class="t" x="410" y="128.5" fill="currentColor" style="fill:currentColor">EfficientNet-B0</text>
+      <text class="t" x="410" y="145.5" fill="currentColor" style="fill:currentColor">backbone</text>
+      <text class="s" x="410" y="161.5">unfrozen from epoch 2</text>
+      <text class="s" x="410" y="178.5">learns 10× slower · lr 0.00003</text>
+      <line class="arr-e41" x1="520" y1="150" x2="538" y2="150"/>
+      <rect class="box" x="540" y="100" width="120" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="600" y="137" fill="currentColor" style="fill:currentColor">Pooled</text>
+      <text class="t" x="600" y="154" fill="currentColor" style="fill:currentColor">features</text>
+      <text class="s" x="600" y="170">1,280 values</text>
+      <line class="arr-e41" x1="660" y1="150" x2="678" y2="150"/>
+      <rect class="box" x="680" y="100" width="90" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="725" y="145.5" fill="currentColor" style="fill:currentColor">Dropout</text>
+      <text class="s" x="725" y="161.5">0.2</text>
+      <line class="arr-e41" x1="770" y1="150" x2="788" y2="150"/>
+      <rect class="box" x="790" y="100" width="130" height="100" rx="8" fill="var(--accent)"/>
+      <text class="t" x="855" y="120" fill="var(--surface)" style="fill:var(--surface)">New linear</text>
+      <text class="t" x="855" y="137" fill="var(--surface)" style="fill:var(--surface)">head</text>
+      <text class="s" x="855" y="153" style="fill:var(--surface);opacity:.9">1,280 → 1</text>
+      <text class="s" x="855" y="170" style="fill:var(--surface);opacity:.9">1,281 weights</text>
+      <text class="s" x="855" y="187" style="fill:var(--surface);opacity:.9">learns · lr 0.0003</text>
+      <line class="arr-e41" x1="920" y1="150" x2="938" y2="150"/>
+      <rect class="box" x="940" y="100" width="80" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="980" y="154" fill="currentColor" style="fill:currentColor">Sigmoid</text>
+      <line class="arr-e41" x1="1020" y1="150" x2="1038" y2="150"/>
+      <rect class="box" x="1040" y="100" width="130" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="1105" y="137" fill="currentColor" style="fill:currentColor">P(fake)</text>
+      <text class="s" x="1105" y="153">≥ 0.5 → fake</text>
+      <text class="s" x="1105" y="170">&lt; 0.5 → real</text>
+    </svg>
+    <figcaption><code>freeze_backbone_epochs: 1</code> and <code>warmup_epochs: 0</code>: the learning rate starts at its full value and follows the cosine curve over all 5 epochs. The training code switches the backbone on again at the start of epoch 2 (<code>set_backbone_trainable</code>).</figcaption>
+    </figure>
+  </section>
+  <section class="exp" id="e5">
+    <h3>E5 · ResNet-50, full fine-tuning<span class="tag">05_resnet50_finetune.yaml</span></h3>
+    <p class="section-note">Same training recipe as E3, with a different and much larger pretrained backbone. It answers whether the architecture matters.</p>
+    <figure class="diagram">
+<svg viewBox="0 0 1180 212" role="img" aria-label="E5 forward pass: a 224 by 224 face image is normalized, passed through the ResNet-50 backbone (pretrained · 23,508,032 weights, learns 10× slower · lr 0.00003), pooled into 2,048 values, passed through dropout and the new linear head (2,048 → 1, 2,049 weights, learns · lr 0.0003), then a sigmoid gives P(fake).">
+      <defs>
+        <marker id="a-e50" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+        </marker>
+      </defs>
+      <style>
+        text{font-family:'Inter',system-ui,sans-serif;fill:currentColor}
+        .t{font-size:12.5px;font-weight:600;text-anchor:middle}
+        .s{font-size:10.5px;fill:var(--muted-fg,#5b6472);text-anchor:middle}
+        .box{stroke:currentColor;stroke-width:1.2}
+        .arr-e50{stroke:currentColor;stroke-width:1.4;fill:none;marker-end:url(#a-e50)}
+        .train{fill:none;stroke:var(--muted-fg,#5b6472);stroke-width:1;stroke-dasharray:4 3}
+        .dmg{fill:none;stroke:var(--damage,#b4472f);stroke-width:1.6;stroke-dasharray:5 3}
+      </style>
+      <rect class="train" x="10" y="12" width="270" height="62" rx="8"/>
+      <text class="t" x="145" y="38">random crop · flip · colour jitter</text>
+      <text class="s" x="145" y="56">clean photos, no damage added</text>
+      <text class="s" x="290" y="30" text-anchor="start" style="text-anchor:start">training only</text>
+      <text class="s" x="290" y="44" text-anchor="start" style="text-anchor:start">(validation / test: resize only)</text>
+      <line class="arr-e50" x1="70" y1="74" x2="70" y2="98" stroke-dasharray="4 3"/>
+      <rect class="box" x="10" y="100" width="120" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="70" y="145.5" fill="currentColor" style="fill:currentColor">RGB face</text>
+      <text class="s" x="70" y="161.5">224×224×3</text>
+      <line class="arr-e50" x1="130" y1="150" x2="148" y2="150"/>
+      <rect class="box" x="150" y="100" width="130" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="215" y="137" fill="currentColor" style="fill:currentColor">ImageNet</text>
+      <text class="t" x="215" y="154" fill="currentColor" style="fill:currentColor">normalize</text>
+      <text class="s" x="215" y="170">mean / std</text>
+      <line class="arr-e50" x1="280" y1="150" x2="298" y2="150"/>
+      <rect class="box" x="300" y="100" width="220" height="100" rx="8" fill="var(--slow-fill)"/>
+      <text class="t" x="410" y="128.5" fill="currentColor" style="fill:currentColor">ResNet-50</text>
+      <text class="t" x="410" y="145.5" fill="currentColor" style="fill:currentColor">backbone</text>
+      <text class="s" x="410" y="161.5">pretrained · 23,508,032 weights</text>
+      <text class="s" x="410" y="178.5">learns 10× slower · lr 0.00003</text>
+      <line class="arr-e50" x1="520" y1="150" x2="538" y2="150"/>
+      <rect class="box" x="540" y="100" width="120" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="600" y="137" fill="currentColor" style="fill:currentColor">Pooled</text>
+      <text class="t" x="600" y="154" fill="currentColor" style="fill:currentColor">features</text>
+      <text class="s" x="600" y="170">2,048 values</text>
+      <line class="arr-e50" x1="660" y1="150" x2="678" y2="150"/>
+      <rect class="box" x="680" y="100" width="90" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="725" y="145.5" fill="currentColor" style="fill:currentColor">Dropout</text>
+      <text class="s" x="725" y="161.5">0.2</text>
+      <line class="arr-e50" x1="770" y1="150" x2="788" y2="150"/>
+      <rect class="box" x="790" y="100" width="130" height="100" rx="8" fill="var(--accent)"/>
+      <text class="t" x="855" y="120" fill="var(--surface)" style="fill:var(--surface)">New linear</text>
+      <text class="t" x="855" y="137" fill="var(--surface)" style="fill:var(--surface)">head</text>
+      <text class="s" x="855" y="153" style="fill:var(--surface);opacity:.9">2,048 → 1</text>
+      <text class="s" x="855" y="170" style="fill:var(--surface);opacity:.9">2,049 weights</text>
+      <text class="s" x="855" y="187" style="fill:var(--surface);opacity:.9">learns · lr 0.0003</text>
+      <line class="arr-e50" x1="920" y1="150" x2="938" y2="150"/>
+      <rect class="box" x="940" y="100" width="80" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="980" y="154" fill="currentColor" style="fill:currentColor">Sigmoid</text>
+      <line class="arr-e50" x1="1020" y1="150" x2="1038" y2="150"/>
+      <rect class="box" x="1040" y="100" width="130" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="1105" y="137" fill="currentColor" style="fill:currentColor">P(fake)</text>
+      <text class="s" x="1105" y="153">≥ 0.5 → fake</text>
+      <text class="s" x="1105" y="170">&lt; 0.5 → real</text>
+    </svg>
+    <figcaption>ResNet-50 is a stem plus 4 stages of 3, 4, 6 and 3 bottleneck blocks with skip connections, ending at 7×7×2,048 before pooling. It has about 6× more weights than EfficientNet-B0, so it uses batch size 32 instead of 64 to fit in GPU memory.</figcaption>
+    </figure>
+  </section>
+  <section class="exp" id="e6">
+    <h3>E6 · EfficientNet-B0, robust training (damage-aware)<span class="tag">06_effnet_robust.yaml</span></h3>
+    <p class="section-note">Exactly the E3 model and recipe. The only change is the training input: half of the training photos get one random kind of real-world damage, so the model learns to cope with poor-quality uploads.</p>
+    <figure class="diagram">
+<svg viewBox="0 0 1180 212" role="img" aria-label="E6 forward pass: a 224 by 224 face image is normalized, passed through the EfficientNet-B0 backbone (pretrained · 4,007,548 weights, learns 10× slower · lr 0.00003), pooled into 1,280 values, passed through dropout and the new linear head (1,280 → 1, 1,281 weights, learns · lr 0.0003), then a sigmoid gives P(fake). During training, half of the photos first get random damage.">
+      <defs>
+        <marker id="a-e60" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+        </marker>
+      </defs>
+      <style>
+        text{font-family:'Inter',system-ui,sans-serif;fill:currentColor}
+        .t{font-size:12.5px;font-weight:600;text-anchor:middle}
+        .s{font-size:10.5px;fill:var(--muted-fg,#5b6472);text-anchor:middle}
+        .box{stroke:currentColor;stroke-width:1.2}
+        .arr-e60{stroke:currentColor;stroke-width:1.4;fill:none;marker-end:url(#a-e60)}
+        .train{fill:none;stroke:var(--muted-fg,#5b6472);stroke-width:1;stroke-dasharray:4 3}
+        .dmg{fill:none;stroke:var(--damage,#b4472f);stroke-width:1.6;stroke-dasharray:5 3}
+      </style>
+      <rect class="train" x="10" y="12" width="270" height="62" rx="8"/>
+      <rect class="dmg" x="14" y="16" width="128" height="54" rx="6"/>
+      <text class="t" x="78" y="36" fill="var(--damage)" style="fill:var(--damage)">+ random damage</text>
+      <text class="s" x="78" y="52">50% of photos · 1 of 5</text>
+      <text class="s" x="78" y="64">kinds · severity 1–5</text>
+      <text class="t" x="212" y="38">crop · flip</text>
+      <text class="t" x="212" y="54">colour jitter</text>
+      <text class="s" x="290" y="30" text-anchor="start" style="text-anchor:start">training only</text>
+      <text class="s" x="290" y="44" text-anchor="start" style="text-anchor:start">(validation / test: resize only)</text>
+      <line class="arr-e60" x1="70" y1="74" x2="70" y2="98" stroke-dasharray="4 3"/>
+      <rect class="box" x="10" y="100" width="120" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="70" y="145.5" fill="currentColor" style="fill:currentColor">RGB face</text>
+      <text class="s" x="70" y="161.5">224×224×3</text>
+      <line class="arr-e60" x1="130" y1="150" x2="148" y2="150"/>
+      <rect class="box" x="150" y="100" width="130" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="215" y="137" fill="currentColor" style="fill:currentColor">ImageNet</text>
+      <text class="t" x="215" y="154" fill="currentColor" style="fill:currentColor">normalize</text>
+      <text class="s" x="215" y="170">mean / std</text>
+      <line class="arr-e60" x1="280" y1="150" x2="298" y2="150"/>
+      <rect class="box" x="300" y="100" width="220" height="100" rx="8" fill="var(--slow-fill)"/>
+      <text class="t" x="410" y="128.5" fill="currentColor" style="fill:currentColor">EfficientNet-B0</text>
+      <text class="t" x="410" y="145.5" fill="currentColor" style="fill:currentColor">backbone</text>
+      <text class="s" x="410" y="161.5">pretrained · 4,007,548 weights</text>
+      <text class="s" x="410" y="178.5">learns 10× slower · lr 0.00003</text>
+      <line class="arr-e60" x1="520" y1="150" x2="538" y2="150"/>
+      <rect class="box" x="540" y="100" width="120" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="600" y="137" fill="currentColor" style="fill:currentColor">Pooled</text>
+      <text class="t" x="600" y="154" fill="currentColor" style="fill:currentColor">features</text>
+      <text class="s" x="600" y="170">1,280 values</text>
+      <line class="arr-e60" x1="660" y1="150" x2="678" y2="150"/>
+      <rect class="box" x="680" y="100" width="90" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="725" y="145.5" fill="currentColor" style="fill:currentColor">Dropout</text>
+      <text class="s" x="725" y="161.5">0.2</text>
+      <line class="arr-e60" x1="770" y1="150" x2="788" y2="150"/>
+      <rect class="box" x="790" y="100" width="130" height="100" rx="8" fill="var(--accent)"/>
+      <text class="t" x="855" y="120" fill="var(--surface)" style="fill:var(--surface)">New linear</text>
+      <text class="t" x="855" y="137" fill="var(--surface)" style="fill:var(--surface)">head</text>
+      <text class="s" x="855" y="153" style="fill:var(--surface);opacity:.9">1,280 → 1</text>
+      <text class="s" x="855" y="170" style="fill:var(--surface);opacity:.9">1,281 weights</text>
+      <text class="s" x="855" y="187" style="fill:var(--surface);opacity:.9">learns · lr 0.0003</text>
+      <line class="arr-e60" x1="920" y1="150" x2="938" y2="150"/>
+      <rect class="box" x="940" y="100" width="80" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="980" y="154" fill="currentColor" style="fill:currentColor">Sigmoid</text>
+      <line class="arr-e60" x1="1020" y1="150" x2="1038" y2="150"/>
+      <rect class="box" x="1040" y="100" width="130" height="100" rx="8" fill="var(--surface)"/>
+      <text class="t" x="1105" y="137" fill="currentColor" style="fill:currentColor">P(fake)</text>
+      <text class="s" x="1105" y="153">≥ 0.5 → fake</text>
+      <text class="s" x="1105" y="170">&lt; 0.5 → real</text>
+    </svg>
+    <figcaption><code>augment.degradation: true</code>, <code>degradation_prob: 0.5</code>: each training photo has a 50% chance of one damage (JPEG, blur, downscale, noise or screen capture) at a random severity 1–5, made fresh each epoch. Validation photos stay clean. At test time E6 runs exactly like E3; comparing the two on the same damaged test photos shows what damage-aware training buys.</figcaption>
+    </figure>
+  </section>
+
+  <h2 id="plan">3. The experiment plan</h2>
+  <p class="section-note"><strong>Words used in the table.</strong>
+  <strong>Clean</strong> = the original real and fake images, with no damage added.
+  <strong>Degradation-aware training</strong> = training with damaged photos: each training photo (real or fake) has a
+  50% chance of getting one random kind of damage (blur, JPEG, downscale, noise or screen capture) at a random
+  severity 1–5, made on the fly. It does <em>not</em> mean "no damaged photos"; it means the model is shown damaged
+  photos while it learns, so it gets used to poor-quality uploads. Only E6 trains this way; E1–E5 train on clean
+  photos. The validation photos always stay clean (real and fake images).</p>
+  <div class="table-wrap">
+  <table class="roadmap">
+    <caption>The project's experiment plan. All six are trained and tested on real and fake faces; they differ in one setting each.</caption>
+    <thead><tr><th>Exp</th><th>Model</th><th>What it changes</th><th>Trained on</th><th>Tested on</th></tr></thead>
+    <tbody>
+      <tr><td>E1</td><td>SimpleCNN</td><td>trained from scratch, no pretrained weights</td><td>clean only (real and fake images), no damaged photos</td><td>clean (real and fake images)</td></tr>
+      <tr><td>E2</td><td>EfficientNet-B0</td><td>frozen pretrained backbone, train only the head</td><td>clean only (real and fake images), no damaged photos</td><td>clean (real and fake images)</td></tr>
+      <tr><td>E3</td><td>EfficientNet-B0</td><td>full fine-tune of the whole backbone, lower learning rate (main model)</td><td>clean only (real and fake images), no damaged photos</td><td>clean (real and fake images) + all 25 kinds/severities of damage: the standard model in the robustness comparison</td></tr>
+      <tr><td>E4</td><td>EfficientNet-B0</td><td>like E3, but the backbone is frozen for the first epoch</td><td>clean only (real and fake images), no damaged photos</td><td>clean (real and fake images)</td></tr>
+      <tr><td>E5</td><td>ResNet-50</td><td>like E3, but a different backbone architecture</td><td>clean only (real and fake images), no damaged photos</td><td>clean (real and fake images)</td></tr>
+      <tr><td>E6</td><td>EfficientNet-B0</td><td>like E3, <strong>plus</strong> degradation-aware training: the robust model</td><td>clean (real and fake images) + damaged: degradation-aware</td><td>clean (real and fake images) + all 25 kinds/severities of damage</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="section-note">Why E6 exists: E3 and E6 are identical except for damage during training. Testing both on the
+  same damaged photos (notebook 03 does this for E3 and E6 by default) shows whether degradation-aware training really
+  makes the model more robust. Set <code>INCLUDE_DAMAGE = True</code> in notebook 03 to test the other models on damage too.</p>
+
+  <div class="table-wrap">
+  <table class="roadmap">
+    <caption>The actual settings, read from the config files (<code>configs/base.yaml</code> plus each file in <code>configs/experiments/</code>).</caption>
+    <thead><tr><th>Exp</th><th>Model</th><th>Pretrained</th><th>Batch</th><th>Epochs</th><th>LR</th><th>Warm-up</th><th>Frozen epochs</th><th>Early stop</th><th>Damage in training</th></tr></thead>
+    <tbody>
+      <tr><td>E1</td><td><code>simple_cnn</code></td><td>no</td><td>64</td><td>10</td><td>0.001</td><td>1</td><td>0</td><td>3</td><td>no</td></tr>
+      <tr><td>E2</td><td><code>efficientnet_b0</code></td><td>yes</td><td>64</td><td>5</td><td>0.001</td><td>1</td><td>all</td><td>2</td><td>no</td></tr>
+      <tr><td>E3</td><td><code>efficientnet_b0</code></td><td>yes</td><td>64</td><td>5</td><td>0.0003</td><td>1</td><td>0</td><td>2</td><td>no</td></tr>
+      <tr><td>E4</td><td><code>efficientnet_b0</code></td><td>yes</td><td>64</td><td>5</td><td>0.0003</td><td>0</td><td>1</td><td>2</td><td>no</td></tr>
+      <tr><td>E5</td><td><code>resnet50</code></td><td>yes</td><td>32</td><td>5</td><td>0.0003</td><td>1</td><td>0</td><td>2</td><td>no</td></tr>
+      <tr><td>E6</td><td><code>efficientnet_b0</code></td><td>yes</td><td>64</td><td>5</td><td>0.0003</td><td>1</td><td>0</td><td>2</td><td>yes</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="section-note"><strong>How to read it.</strong> LR = learning rate of the new last layer; the pretrained
+  backbone learns 10× slower (E1 has no pretrained part). Warm-up = epochs in which the learning rate rises slowly from 0.
+  Frozen epochs = epochs in which the backbone does not learn (E2: the whole run). Early stop = training stops if the
+  validation loss has not improved for this many epochs in a row; the best epoch is kept. All experiments use seed 42,
+  AdamW, dropout 0.2, 224×224 images and mixed precision on a GPU.</p>
+
+  <footer>
+    The notebook scores models on the validation split while you choose settings; the test split is used once, at the
+    end (Step 9). These are research classifiers for images in a benchmark dataset; they do not establish identity or
+    prove fraud on their own.
+  </footer>
+</main>

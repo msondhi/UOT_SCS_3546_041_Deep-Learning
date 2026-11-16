@@ -30,15 +30,10 @@ def train_one_epoch(
     optimizer,
     scheduler,
     device,
-    freeze_batch_norm: bool = False,
     scaler: torch.amp.GradScaler | None = None,
 ) -> float:
     """One pass over the training data. ``scaler`` switches on mixed precision (GPU only, about 2x faster)."""
     model.train()
-    if freeze_batch_norm:
-        for module in model.modules():
-            if isinstance(module, nn.modules.batchnorm._BatchNorm):
-                module.eval()
     total_loss, seen = 0.0, 0
     for images, labels in tqdm(loader, desc="train", leave=False):
         images = images.to(device, non_blocking=True)

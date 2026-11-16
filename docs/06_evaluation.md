@@ -41,7 +41,7 @@ In the report, discuss what threshold a bank might choose and why. Your payments
 
 That's 26 conditions, one row each in `eval_test.csv`.
 
-**How to present it:** one line chart per degradation, with severity on the x-axis and accuracy (or FAR) on the y-axis, and two lines: E3 (trained with damage-aware augmentation) and E6 (same model trained on clean photos only). This is the key figure of the project.
+**How to present it:** one line chart per degradation, with severity on the x-axis and accuracy (or FAR) on the y-axis, and two lines: E3 (standard) and E6 (robust-trained). This is the key figure of the project.
 
 ## Out-of-distribution evaluation
 Run the model on fakes from a generator it never saw (see [03 Data](03_data.md)), and compare with clean test results. A large drop means the model learned StyleGAN-specific artifacts, not general "fakeness".

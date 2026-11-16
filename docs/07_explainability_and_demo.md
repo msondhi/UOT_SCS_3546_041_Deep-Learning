@@ -25,7 +25,7 @@ This saves `gradcam_<split>.png` next to the checkpoint: each row is the origina
 Compare heatmaps for:
 - correct vs. wrong predictions
 - clean vs. degraded images (does attention shift when the image is blurred?)
-- E3 vs. E6 (does damage-aware training change what it looks at?)
+- E3 vs. E6 (does robust training change what it looks at?)
 
 ### Caution
 Grad-CAM is a rough guide, not proof. Heatmaps are low-resolution and can look convincing even when they're misleading. Say this in the report.
@@ -34,7 +34,7 @@ Grad-CAM is a rough guide, not proof. Heatmaps are low-resolution and can look c
 
 ### Run it
 ```bash
-make demo CKPT=outputs/03_effnet_finetune/best.pt
+make demo CKPT=outputs/06_effnet_robust/best.pt
 ```
 Open the link it prints (usually http://127.0.0.1:7860). Upload a face photo and you'll see:
 - the prediction: "AI-generated" vs. "Real" with probabilities

@@ -20,7 +20,7 @@ Training a big network from scratch needs millions of images. Instead, we start 
 ### Three ways to fine-tune
 | Strategy | What's trained | Experiment |
 |---|---|---|
-| Frozen backbone | Only the new head. The pretrained layers and BatchNorm running statistics stay fixed. | E2 |
+| Frozen backbone | Only the new head. The pretrained layers stay fixed. | E2 |
 | Full fine-tuning | Everything. The backbone learns 10× slower than the head. | E3 |
 | Gradual unfreezing | Head only for the first epoch, then everything | E4 |
 
@@ -42,7 +42,7 @@ The backbone gets a lower learning rate (`backbone_lr_mult: 0.1`) so we gently a
 Small random changes to training images so the model learns the face, not accidental details of each photo.
 
 - **Standard** (always on): random crop and resize, horizontal flip, small brightness/contrast/colour changes
-- **Degradation-aware** (every experiment except the E6 control): with 50% probability, also apply one random real-world degradation (next section) at a random severity. Only training images are damaged; validation and test images stay clean unless a robustness test damages them on purpose
+- **Degradation-aware** (E6 only): with 50% probability, also apply one random real-world degradation (next section) at a random severity
 
 ## 6. Robustness: real-world degradations
 Real KYC photos are not clean lab images. `degradations.py` simulates five common problems, each at severity 1 (mild) to 5 (severe):
@@ -55,7 +55,7 @@ Real KYC photos are not clean lab images. `degradations.py` simulates five commo
 | `noise` | Poor lighting and sensor noise | Noise std 5 → 45 |
 | `screen` | Photographing a screen (a common fraud trick) | Moiré strength 0.03 → 0.15 |
 
-We use them twice: to **test** robustness (evaluate on degraded test images) and to **improve** it (augmentation during training; E6 is trained without it as the control).
+We use them twice: to **test** robustness (evaluate on degraded test images) and to **improve** it (augmentation in E6).
 
 ## 7. Generalization to unseen generators
 A detector trained on StyleGAN faces may learn "StyleGAN's fingerprint" rather than "what fake looks like". Testing on a different generator (see [03 Data](03_data.md#out-of-distribution-ood-test-set-optional-recommended)) shows whether it learned something more general. A big drop here is common and is an important finding.

@@ -2,8 +2,6 @@
 
 Every experiment is a YAML file in `configs/experiments/`. Each file starts from `configs/base.yaml` and lists only what changes, so it's easy to see exactly what differs between experiments.
 
-All experiments train on real and fake faces with degradation-aware augmentation on (`augment.degradation: true` in `base.yaml`): each training photo has a 50% chance of a random blur/JPEG/downscale/noise/screen effect, generated on the fly. E6 is the one exception, kept as a clean-training control.
-
 ## Experiment plan
 
 | ID | Config | Question it answers | Compare with |
@@ -13,10 +11,10 @@ All experiments train on real and fake faces with degradation-aware augmentation
 | E3 | `03_effnet_finetune.yaml` | Does full fine-tuning help? (**main model**) | E2 |
 | E4 | `04_effnet_gradual.yaml` | Does gradual unfreezing help? | E3 |
 | E5 | `05_resnet50_finetune.yaml` | Does the architecture matter? | E3 |
-| E6 | `06_effnet_clean.yaml` | Control: E3 trained on clean photos only. Does degradation-aware training improve robustness? | E3 |
+| E6 | `06_effnet_robust.yaml` | Does degradation-aware training improve robustness? | E3 |
 | E7 | E3 with `--set` subsets | How much data do we need? | E3 |
 
-`notebooks/05_next_architecture_effnet_b0.ipynb` trains any of E1-E6 from the notebook (choose them in `EXPERIMENTS`, Step 2; each experiment is saved in its own `outputs/<experiment_name>/` folder, and finished models are never overwritten unless `OVERWRITE = True`). [docs/e2_notebook_flow.html](e2_notebook_flow.html) still shows the original E2-only version of that notebook and the frozen-backbone model architecture.
+`notebooks/05_next_architecture_effnet_b0.ipynb` trains any of E1-E6 from the notebook (choose them in `EXPERIMENTS`, Step 2; each experiment is saved in its own `outputs/<experiment_name>/` folder, and finished models are never overwritten unless `OVERWRITE = True`). [docs/experiments_flow.html](experiments_flow.html) shows the notebook's steps and, for each of E1-E6, what the model computes on one image (which parts are frozen, which learn and how fast).
 
 ## How to run
 
@@ -85,7 +83,7 @@ Split the runs across team members' laptops and Colab so they happen in parallel
 | E3 | EfficientNet-B0 | fine-tune | | | | | | |
 | E4 | EfficientNet-B0 | gradual | | | | | | |
 | E5 | ResNet-50 | fine-tune | | | | | | |
-| E6 | EfficientNet-B0 | fine-tune, no damage aug (control) | | | | | | |
+| E6 | EfficientNet-B0 | fine-tune + robust aug | | | | | | |
 
 ### Robustness (accuracy, E3 vs. E6)
 | Degradation | Sev 1 | Sev 3 | Sev 5 |

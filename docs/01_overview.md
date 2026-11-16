@@ -28,7 +28,7 @@ A deep learning model that looks at a face photo and outputs **the probability t
 | G1 | Build a working real-vs-fake classifier | Test accuracy and ROC-AUC |
 | G2 | Show the value of transfer learning | Baseline CNN (E1) vs. pretrained models (E2-E5) |
 | G3 | Measure real-world robustness | Accuracy at degradation severities 1-5 |
-| G4 | Improve robustness | Damage-aware main model (E3) vs. the same model trained on clean photos only (E6) |
+| G4 | Improve robustness | Standard model (E3) vs. robust-trained model (E6) |
 | G5 | Explain decisions | Grad-CAM heatmaps on correct and wrong predictions |
 | G6 | Demonstrate it | Gradio demo app |
 

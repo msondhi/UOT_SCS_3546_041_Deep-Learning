@@ -1,8 +1,0 @@
-# E6 - Control: same as E3 but trained on clean photos only (no degradation-aware augmentation).
-# Every other experiment trains on clean + randomly damaged photos (see augment in base.yaml),
-# so E3 vs. E6 shows how much damage-aware training helps on poor-quality uploads.
-base: ../base.yaml
-experiment_name: 06_effnet_clean
-
-augment:
-  degradation: false

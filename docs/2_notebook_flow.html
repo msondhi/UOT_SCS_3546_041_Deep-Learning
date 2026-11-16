@@ -206,7 +206,7 @@ svg .lane{font-size:11px;fill:var(--muted-fg);letter-spacing:.06em}
       <rect class="chip" x="808" y="400" width="110" height="72" rx="6"/>
       <text class="mono" x="863" y="422" font-size="12" text-anchor="middle" font-weight="500">eval_*.csv</text>
       <text class="lbl" x="863" y="440" text-anchor="middle">test scores,</text>
-      <text class="lbl" x="863" y="455" text-anchor="middle">clean + damaged</text>
+      <text class="lbl" x="863" y="455" text-anchor="middle">clean (+ damaged)</text>
 
       <!-- arrows: processes <-> results band -->
       <line class="write" x1="392.5" y1="268" x2="392.5" y2="336" marker-end="url(#aw)"/>
@@ -266,13 +266,13 @@ svg .lane{font-size:11px;fill:var(--muted-fg);letter-spacing:.06em}
       <tr><td>1</td><td><code>01_explore_data</code></td><td>The dataset attached with <strong>Add Input</strong></td><td>Nothing, counts and pictures only</td></tr>
       <tr><td>2</td><td><code>02_degradations_gallery</code></td><td>Nothing (uses a test image if no data)</td><td>Nothing, pictures only</td></tr>
       <tr><td>3</td><td><code>05_next_architecture_effnet_b0</code> or <code>python -m deepfake_kyc.train --config …</code></td><td>The attached dataset</td><td><code>outputs/&lt;experiment&gt;/best.pt</code>, <code>config.yaml</code>, <code>history.csv</code>, <code>summary.json</code></td></tr>
-      <tr><td>4</td><td><code>python -m deepfake_kyc.evaluate --checkpoint outputs/&lt;experiment&gt;/best.pt --degradation all</code></td><td><code>best.pt</code> from step 3 + test images</td><td><code>outputs/&lt;experiment&gt;/eval_*.csv</code></td></tr>
+      <tr><td>4</td><td><code>python -m deepfake_kyc.evaluate --checkpoint outputs/&lt;experiment&gt;/best.pt</code> (add <code>--degradation all</code> for E3 and E6, the robustness comparison)</td><td><code>best.pt</code> from step 3 + test images</td><td><code>outputs/&lt;experiment&gt;/eval_*.csv</code></td></tr>
       <tr><td>5</td><td><code>03_results_charts</code></td><td><code>eval_*.csv</code> from step 4</td><td>Nothing, tables and charts only</td></tr>
       <tr><td>6</td><td><code>04_error_analysis</code></td><td><code>best.pt</code> from step 3 + test images</td><td>Nothing, mistake pictures and heatmaps only</td></tr>
     </tbody>
   </table>
   </div>
-  <p class="note">Repeat steps 3 and 4 for each experiment (01_baseline_cnn … 06_effnet_clean). Each gets its own
+  <p class="note">Repeat steps 3 and 4 for each experiment (01_baseline_cnn … 06_effnet_robust). Each gets its own
   sub-folder in <code>outputs/</code>, and notebook 03 puts them all on the same chart.</p>
 
   <h2>4. The important folders</h2>
@@ -316,7 +316,7 @@ svg .lane{font-size:11px;fill:var(--muted-fg);letter-spacing:.06em}
 
   <footer>Covers notebooks 01–05 and the <code>deepfake_kyc.train</code> / <code>deepfake_kyc.evaluate</code> scripts.
   Folder names come from <code>configs/base.yaml</code>; file names come from <code>src/deepfake_kyc/train.py</code> and
-  <code>evaluate.py</code>. See also <a href="e2_notebook_flow.html">e2_notebook_flow.html</a> for the cell-by-cell flow of notebook 05.</footer>
+  <code>evaluate.py</code>. See also <a href="experiments_flow.html">experiments_flow.html</a> for the step-by-step flow of notebook 05 and each experiment's model.</footer>
 </main>
 </body>
 </html>
