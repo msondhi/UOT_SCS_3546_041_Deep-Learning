@@ -1,0 +1,10 @@
+.venv/bin/python -m deepfake_kyc.train --config configs/experiments/03_effnet_finetune.yaml
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Experiment 03_effnet_finetune on mps -> outputs/03_effnet_finetune
+Train images: 100000  Val images: 20000
+epoch=1  backbone_frozen=False  train_loss=1.32958  val_loss=0.26944  val_accuracy=0.9242  val_f1=0.9214  val_roc_auc=0.98054  seconds=1468.5
+epoch=2  backbone_frozen=False  train_loss=0.23073  val_loss=0.0823  val_accuracy=0.97435  val_f1=0.97394  val_roc_auc=0.99784  seconds=1437.6
+epoch=3  backbone_frozen=False  train_loss=0.09422  val_loss=0.03815  val_accuracy=0.98655  val_f1=0.98647  val_roc_auc=0.9993  seconds=1630.8
+epoch=4  backbone_frozen=False  train_loss=0.06105  val_loss=0.03063  val_accuracy=0.9885  val_f1=0.98843  val_roc_auc=0.99959  seconds=1493.5
+epoch=5  backbone_frozen=False  train_loss=0.05172  val_loss=0.03046  val_accuracy=0.9889  val_f1=0.98883  val_roc_auc=0.99962  seconds=1522.2
+Best epoch 5: val_loss=0.03046 val_accuracy=0.9889
