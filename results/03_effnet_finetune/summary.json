@@ -1,0 +1,14 @@
+{
+  "experiment_name": "03_effnet_finetune",
+  "best_epoch": 5,
+  "best": {
+    "epoch": 5,
+    "backbone_frozen": false,
+    "train_loss": 0.05172,
+    "val_loss": 0.03046,
+    "val_accuracy": 0.9889,
+    "val_f1": 0.98883,
+    "val_roc_auc": 0.99962,
+    "seconds": 1522.2
+  }
+}

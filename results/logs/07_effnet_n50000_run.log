@@ -1,0 +1,12 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Experiment 07_effnet_n50000 on mps -> outputs/07_effnet_n50000
+Train images: 50000  Val images: 20000
+Python(46332) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+Python(46356) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+Python(46358) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+epoch=1  backbone_frozen=False  train_loss=1.64812  val_loss=0.46004  val_accuracy=0.87095  val_f1=0.86728  val_roc_auc=0.94565  seconds=803.4
+epoch=2  backbone_frozen=False  train_loss=0.43478  val_loss=0.1929  val_accuracy=0.9424  val_f1=0.94055  val_roc_auc=0.9898  seconds=863.1
+epoch=3  backbone_frozen=False  train_loss=0.22106  val_loss=0.12097  val_accuracy=0.96295  val_f1=0.96214  val_roc_auc=0.99563  seconds=848.4
+epoch=4  backbone_frozen=False  train_loss=0.14633  val_loss=0.1087  val_accuracy=0.9652  val_f1=0.9644  val_roc_auc=0.99669  seconds=849.6
+epoch=5  backbone_frozen=False  train_loss=0.12622  val_loss=0.08346  val_accuracy=0.97225  val_f1=0.97209  val_roc_auc=0.9969  seconds=849.5
+Best epoch 5: val_loss=0.08346 val_accuracy=0.97225
