@@ -1,0 +1,14 @@
+{
+  "experiment_name": "05_resnet50_finetune_msondhi",
+  "best_epoch": 5,
+  "best": {
+    "epoch": 5,
+    "backbone_frozen": false,
+    "train_loss": 0.04444,
+    "val_loss": 0.02311,
+    "val_accuracy": 0.9925,
+    "val_f1": 0.99249,
+    "val_roc_auc": 0.9997,
+    "seconds": 253.6
+  }
+}

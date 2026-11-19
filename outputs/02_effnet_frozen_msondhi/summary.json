@@ -1,0 +1,14 @@
+{
+  "experiment_name": "02_effnet_frozen_msondhi",
+  "best_epoch": 5,
+  "best": {
+    "epoch": 5,
+    "backbone_frozen": true,
+    "train_loss": 0.77448,
+    "val_loss": 0.58828,
+    "val_accuracy": 0.77745,
+    "val_f1": 0.77546,
+    "val_roc_auc": 0.86002,
+    "seconds": 91.9
+  }
+}

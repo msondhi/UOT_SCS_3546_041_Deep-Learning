@@ -1,0 +1,2 @@
+condition,severity,accuracy,precision,recall,f1,roc_auc,far,frr,tp,fp,tn,fn
+clean,0,0.7827,0.78871,0.7723,0.78042,0.86172,0.2277,0.2069,7723,2069,7931,2277

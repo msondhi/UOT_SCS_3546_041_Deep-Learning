@@ -1,0 +1,14 @@
+{
+  "experiment_name": "04_effnet_gradual_msondhi",
+  "best_epoch": 5,
+  "best": {
+    "epoch": 5,
+    "backbone_frozen": false,
+    "train_loss": 0.08269,
+    "val_loss": 0.04893,
+    "val_accuracy": 0.98245,
+    "val_f1": 0.9823,
+    "val_roc_auc": 0.99896,
+    "seconds": 167.4
+  }
+}

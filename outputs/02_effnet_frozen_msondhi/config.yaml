@@ -1,0 +1,28 @@
+experiment_name: 02_effnet_frozen_msondhi
+seed: 42
+output_dir: /content/drive/MyDrive/deepfake_kyc/UOT_SCS_3546_041_Deep-Learning/outputs
+data:
+  root: /content/data/real_vs_fake/real-vs-fake
+  image_size: 224
+  batch_size: 64
+  num_workers: 12
+  train_subset: null
+  val_subset: null
+  test_subset: null
+augment:
+  standard: true
+  degradation: false
+  degradation_prob: 0.5
+model:
+  name: efficientnet_b0
+  pretrained: true
+  dropout: 0.2
+train:
+  epochs: 5
+  lr: 0.001
+  backbone_lr_mult: 0.1
+  weight_decay: 0.0001
+  warmup_epochs: 1
+  freeze_backbone_epochs: 999
+  early_stopping_patience: 2
+  amp: true

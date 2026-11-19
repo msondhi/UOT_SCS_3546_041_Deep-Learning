@@ -11,7 +11,9 @@ __pycache__/
 data/**
 !data/**/
 !data/**/.gitkeep
-outputs/
+# outputs/: the small result files (config.yaml, history.csv, summary.json, eval_*.csv) are committed;
+# the model weights (best.pt, caught by *.pt below) and the quick test runs are not.
+outputs/*_notebook_demo/
 *.pt
 *.pth
 
