@@ -152,14 +152,16 @@ h3{
 
 <main>
   <p class="eyebrow">notebooks/05_next_architecture_effnet_b0.ipynb · configs/experiments/</p>
-  <h1>Experiment model flows: E1–E6</h1>
+  <h1>Experiment model flows: E1–E7</h1>
   <p class="lede">What notebook 05 runs and in what order (top), what each experiment's model computes on one face image
   (middle), and the full experiment plan (bottom). Amber steps are opt-in and do nothing until you set a flag.</p>
 
   <h2>1. What notebook 05 runs, step by step</h2>
   <p class="section-note">The same notebook trains any experiment: choose them in <code>EXPERIMENTS</code> (Step 2) and each
-  one is saved in its own <code>outputs/&lt;experiment&gt;/</code> folder. Everything up to the model check runs
-  automatically; training and the final test score only run when you switch them on.</p>
+  one is saved in its own <code>outputs/&lt;experiment&gt;/</code> folder (plus your <code>NAME_SUFFIX</code>, if you set
+  one, e.g. <code>outputs/03_effnet_finetune_msondhi/</code>). E7 becomes three runs, one per training-set size in
+  <code>E7_TRAIN_SIZES</code>. Everything up to the model check runs automatically; training and the final test score
+  only run when you switch them on.</p>
 
   <figure class="diagram">
     <svg viewBox="0 0 920 956" role="img" aria-label="Flowchart of notebook 05: get the project, choose experiments, check the dataset, choose the output folder, look at photos, build and check each model, then two opt-in steps for training and the final test score, ending with notebooks 03 and 04.">
@@ -186,7 +188,7 @@ h3{
       <line class="flow" x1="460" y1="78" x2="460" y2="112"/>
       <rect class="node" x="250" y="112" width="420" height="58" rx="8"/>
       <text class="title" x="460" y="136" text-anchor="middle">Step 2 · Choose EXPERIMENTS, read settings</text>
-      <text class="mono" x="460" y="154" text-anchor="middle">configs/base.yaml + configs/experiments/<name>.yaml</text>
+      <text class="mono" x="460" y="154" text-anchor="middle">base.yaml + experiments/&lt;name&gt;.yaml · E7 = E3 file × 3 sizes</text>
       <line class="flow" x1="460" y1="170" x2="460" y2="204"/>
       <rect class="node" x="250" y="204" width="420" height="58" rx="8"/>
       <text class="title" x="460" y="228" text-anchor="middle">Step 3 · Check the dataset</text>
@@ -194,7 +196,7 @@ h3{
       <line class="flow" x1="460" y1="262" x2="460" y2="296"/>
       <rect class="node" x="250" y="296" width="420" height="58" rx="8"/>
       <text class="title" x="460" y="320" text-anchor="middle">Step 4 · Where models are saved</text>
-      <text class="mono" x="460" y="338" text-anchor="middle">outputs/<experiment>/  (one folder each)</text>
+      <text class="mono" x="460" y="338" text-anchor="middle">outputs/&lt;run&gt;&lt;NAME_SUFFIX&gt;/  (one folder per run)</text>
       <line class="flow" x1="460" y1="354" x2="460" y2="388"/>
       <rect class="pod" x="250" y="388" width="420" height="58" rx="8"/>
       <text class="title" x="460" y="412" text-anchor="middle">Step 5 · Look at a few training photos</text>
@@ -206,12 +208,12 @@ h3{
       <line class="flow" x1="460" y1="538" x2="460" y2="572"/>
       <rect class="node opt optfill" x="250" y="572" width="420" height="58" rx="8"/>
       <text class="title" x="460" y="596" text-anchor="middle">OPT-IN · Step 7 · Train</text>
-      <text class="mono" x="460" y="614" text-anchor="middle">RUN_TRAINING · QUICK_RUN (1,000 photos) or full · OVERWRITE</text>
+      <text class="mono" x="460" y="614" text-anchor="middle">RUN_TRAINING · QUICK_RUN (1,000 photos; E7: ÷10) · OVERWRITE</text>
       <line class="flow" x1="460" y1="630" x2="460" y2="664"/>
       <text class="mono" x="470" y="652" font-size="10">writes best.pt · config.yaml · history.csv · summary.json</text>
       <rect class="node" x="250" y="664" width="420" height="58" rx="8"/>
       <text class="title" x="460" y="688" text-anchor="middle">Step 8 · Read the training results</text>
-      <text class="mono" x="460" y="706" text-anchor="middle">summary.json · history.csv · loss chart per experiment</text>
+      <text class="mono" x="460" y="706" text-anchor="middle">loss chart per run · E7: accuracy vs. training photos</text>
       <line class="flow" x1="460" y1="722" x2="460" y2="756"/>
       <rect class="node opt optfill" x="250" y="756" width="420" height="58" rx="8"/>
       <text class="title" x="460" y="780" text-anchor="middle">OPT-IN, once · Step 9 · Test score</text>
@@ -239,7 +241,7 @@ h3{
   <p class="section-note">Every experiment uses the same pipeline: a 224×224 face is normalized, turned into features by a
   backbone, pooled into one number per feature, passed through dropout and a new one-output linear head, and a sigmoid turns
   that score into <code>P(fake)</code>. Training minimizes <code>BCEWithLogitsLoss</code> with AdamW. What differs is the
-  backbone, which parts learn, how fast, and (E6 only) what the training photos look like.</p>
+  backbone, which parts learn, how fast, and what the training photos are: damaged for E6, fewer of them for E7.</p>
   <ul class="toc">
     <li><a href="#e1">E1 · Baseline CNN</a></li>
     <li><a href="#e2">E2 · Frozen</a></li>
@@ -247,6 +249,7 @@ h3{
     <li><a href="#e4">E4 · Gradual</a></li>
     <li><a href="#e5">E5 · ResNet-50</a></li>
     <li><a href="#e6">E6 · Robust</a></li>
+    <li><a href="#e7">E7 · Data size</a></li>
     <li><a href="#plan">Experiment plan</a></li>
   </ul>
   <div class="legend-key">
@@ -267,6 +270,7 @@ h3{
       <tr><td><a href="#e4">E4</a></td><td>EfficientNet-B0 (ImageNet)</td><td>1,281, then all</td><td>0.0003</td><td>0.00003 from epoch 2</td><td>1</td><td>clean</td></tr>
       <tr><td><a href="#e5">E5</a></td><td>ResNet-50 (ImageNet)</td><td>23,510,081 (all)</td><td>0.0003</td><td>0.00003</td><td>0</td><td>clean</td></tr>
       <tr><td><a href="#e6">E6</a></td><td>EfficientNet-B0 (ImageNet)</td><td>4,008,829 (all)</td><td>0.0003</td><td>0.00003</td><td>0</td><td>clean + 50% damaged</td></tr>
+      <tr><td><a href="#e7">E7</a></td><td>EfficientNet-B0 (ImageNet)</td><td>4,008,829 (all)</td><td>0.0003</td><td>0.00003</td><td>0</td><td>clean, only 1,000 / 10,000 / 50,000</td></tr>
     </tbody>
   </table>
   </div>
@@ -739,6 +743,72 @@ h3{
     <figcaption><code>augment.degradation: true</code>, <code>degradation_prob: 0.5</code>: each training photo has a 50% chance of one damage (JPEG, blur, downscale, noise or screen capture) at a random severity 1–5, made fresh each epoch. Validation photos stay clean. At test time E6 runs exactly like E3; comparing the two on the same damaged test photos shows what damage-aware training buys.</figcaption>
     </figure>
   </section>
+  <section class="exp" id="e7">
+    <h3>E7 · EfficientNet-B0, data-size study<span class="tag">03_effnet_finetune.yaml + data.train_subset</span></h3>
+    <p class="section-note">Exactly the E3 model and recipe, so its forward pass is the <a href="#e3">E3 diagram</a>. The only change is
+    <strong>how many training photos</strong> it learns from. Notebook 05 trains it three times, once per size in
+    <code>E7_TRAIN_SIZES</code>, and your full E3 run is the 100,000-photo point. It answers how much training data the model really needs.</p>
+    <figure class="diagram">
+<svg viewBox="0 0 1180 232" role="img" aria-label="E7 data-size study: three runs with 1,000, 10,000 and 50,000 training photos, plus the existing E3 run with all 100,000, all go into the same E3 model and recipe (EfficientNet-B0, pretrained, every layer learns, 5 epochs, batch 64, seed 42, the same 20,000 validation photos). Each run's best validation accuracy becomes one point of a curve of accuracy against the number of training photos.">
+      <defs>
+        <marker id="a-e70" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+        </marker>
+      </defs>
+      <style>
+        text{font-family:'Inter',system-ui,sans-serif;fill:currentColor}
+        .t{font-size:12.5px;font-weight:600;text-anchor:middle}
+        .s{font-size:10.5px;fill:var(--muted-fg,#5b6472);text-anchor:middle}
+        .m{font-family:'JetBrains Mono',monospace;font-size:10px;fill:var(--muted-fg,#5b6472);text-anchor:middle}
+        .box{stroke:currentColor;stroke-width:1.2}
+        .old{stroke:currentColor;stroke-width:1;stroke-dasharray:4 3}
+        .arr-e70{stroke:currentColor;stroke-width:1.4;fill:none;marker-end:url(#a-e70)}
+        .axis{stroke:currentColor;stroke-width:1}
+        .curve{stroke:var(--accent);stroke-width:2;fill:none}
+      </style>
+      <rect class="box" x="10" y="10" width="250" height="46" rx="8" fill="var(--surface)"/>
+      <text class="t" x="135" y="30">1,000 training photos</text>
+      <text class="m" x="135" y="46">07_effnet_n1000</text>
+      <rect class="box" x="10" y="64" width="250" height="46" rx="8" fill="var(--surface)"/>
+      <text class="t" x="135" y="84">10,000 training photos</text>
+      <text class="m" x="135" y="100">07_effnet_n10000</text>
+      <rect class="box" x="10" y="118" width="250" height="46" rx="8" fill="var(--surface)"/>
+      <text class="t" x="135" y="138">50,000 training photos</text>
+      <text class="m" x="135" y="154">07_effnet_n50000</text>
+      <rect class="old" x="10" y="172" width="250" height="46" rx="8" fill="var(--surface)"/>
+      <text class="t" x="135" y="192">all 100,000 photos</text>
+      <text class="m" x="135" y="208">your E3 run (not trained again)</text>
+      <line class="arr-e70" x1="260" y1="33" x2="318" y2="96"/>
+      <line class="arr-e70" x1="260" y1="87" x2="318" y2="108"/>
+      <line class="arr-e70" x1="260" y1="141" x2="318" y2="126"/>
+      <line class="arr-e70" x1="260" y1="195" x2="318" y2="138"/>
+      <rect class="box" x="320" y="50" width="360" height="136" rx="8" fill="var(--slow-fill)"/>
+      <text class="t" x="500" y="78">Same E3 model and recipe</text>
+      <text class="s" x="500" y="100">EfficientNet-B0 · pretrained · all 4,008,829 weights learn</text>
+      <text class="s" x="500" y="118">head lr 0.0003 · backbone lr 0.00003</text>
+      <text class="s" x="500" y="136">5 epochs · batch 64 · seed 42 · clean photos</text>
+      <text class="s" x="500" y="154">the same 20,000 validation photos</text>
+      <text class="s" x="500" y="172">only data.train_subset changes</text>
+      <line class="arr-e70" x1="680" y1="118" x2="738" y2="118"/>
+      <rect class="box" x="740" y="10" width="430" height="208" rx="8" fill="var(--surface)"/>
+      <text class="t" x="955" y="32">Data-size curve (notebook 05, Step 8)</text>
+      <line class="axis" x1="800" y1="186" x2="1140" y2="186"/>
+      <line class="axis" x1="800" y1="186" x2="800" y2="48"/>
+      <path class="curve" d="M812,166 C880,120 940,80 1000,66 S1100,58 1130,56"/>
+      <circle cx="812" cy="166" r="4" fill="var(--accent)"/>
+      <circle cx="925" cy="96" r="4" fill="var(--accent)"/>
+      <circle cx="1030" cy="62" r="4" fill="var(--accent)"/>
+      <circle cx="1130" cy="56" r="4" fill="var(--accent)"/>
+      <text class="m" x="812" y="202">1k</text>
+      <text class="m" x="925" y="202">10k</text>
+      <text class="m" x="1030" y="202">50k</text>
+      <text class="m" x="1130" y="202">100k</text>
+      <text class="s" x="970" y="214">training photos (log scale) · schematic shape</text>
+      <text class="s" x="790" y="118" transform="rotate(-90 790 118)">best val accuracy</text>
+    </svg>
+    <figcaption>Each run picks its photos at random with the fixed seed, so the smaller sets are part of the bigger ones. Only the training set shrinks: validation and test photos stay the same, so the runs are directly comparable. Where the curve flattens, more data stops helping much. Caveat for the report: every run gets the same 5 epochs, so a small set also gets far fewer learning steps (1,000 photos ≈ 80 steps; 100,000 ≈ 7,800), and the small runs are partly under-trained as well as short of data.</figcaption>
+    </figure>
+  </section>
 
   <h2 id="plan">3. The experiment plan</h2>
   <p class="section-note"><strong>Words used in the table.</strong>
@@ -746,11 +816,11 @@ h3{
   <strong>Degradation-aware training</strong> = training with damaged photos: each training photo (real or fake) has a
   50% chance of getting one random kind of damage (blur, JPEG, downscale, noise or screen capture) at a random
   severity 1–5, made on the fly. It does <em>not</em> mean "no damaged photos"; it means the model is shown damaged
-  photos while it learns, so it gets used to poor-quality uploads. Only E6 trains this way; E1–E5 train on clean
+  photos while it learns, so it gets used to poor-quality uploads. Only E6 trains this way; E1–E5 and E7 train on clean
   photos. The validation photos always stay clean (real and fake images).</p>
   <div class="table-wrap">
   <table class="roadmap">
-    <caption>The project's experiment plan. All six are trained and tested on real and fake faces; they differ in one setting each.</caption>
+    <caption>The project's experiment plan. All seven are trained and tested on real and fake faces; they differ in one setting each.</caption>
     <thead><tr><th>Exp</th><th>Model</th><th>What it changes</th><th>Trained on</th><th>Tested on</th></tr></thead>
     <tbody>
       <tr><td>E1</td><td>SimpleCNN</td><td>trained from scratch, no pretrained weights</td><td>clean only (real and fake images), no damaged photos</td><td>clean (real and fake images)</td></tr>
@@ -759,12 +829,15 @@ h3{
       <tr><td>E4</td><td>EfficientNet-B0</td><td>like E3, but the backbone is frozen for the first epoch</td><td>clean only (real and fake images), no damaged photos</td><td>clean (real and fake images)</td></tr>
       <tr><td>E5</td><td>ResNet-50</td><td>like E3, but a different backbone architecture</td><td>clean only (real and fake images), no damaged photos</td><td>clean (real and fake images)</td></tr>
       <tr><td>E6</td><td>EfficientNet-B0</td><td>like E3, <strong>plus</strong> degradation-aware training: the robust model</td><td>clean (real and fake images) + damaged: degradation-aware</td><td>clean (real and fake images) + all 25 kinds/severities of damage</td></tr>
+      <tr><td>E7</td><td>EfficientNet-B0</td><td>exactly E3, but trained on <strong>fewer photos</strong>: three runs with 1,000, 10,000 and 50,000 (E3 is the 100,000 point)</td><td>clean only (real and fake images), a random part of the training set</td><td>clean (real and fake images)</td></tr>
     </tbody>
   </table>
   </div>
   <p class="section-note">Why E6 exists: E3 and E6 are identical except for damage during training. Testing both on the
   same damaged photos (notebook 03 does this for E3 and E6 by default) shows whether degradation-aware training really
-  makes the model more robust. Set <code>INCLUDE_DAMAGE = True</code> in notebook 03 to test the other models on damage too.</p>
+  makes the model more robust. Set <code>INCLUDE_DAMAGE = True</code> in notebook 03 to test the other models on damage too.
+  Why E7 exists: collecting and labelling data is expensive, so it is worth knowing whether a smaller training set would
+  have been almost as good. E7 changes nothing but the amount of training data.</p>
 
   <div class="table-wrap">
   <table class="roadmap">
@@ -777,6 +850,7 @@ h3{
       <tr><td>E4</td><td><code>efficientnet_b0</code></td><td>yes</td><td>64</td><td>5</td><td>0.0003</td><td>0</td><td>1</td><td>2</td><td>no</td></tr>
       <tr><td>E5</td><td><code>resnet50</code></td><td>yes</td><td>32</td><td>5</td><td>0.0003</td><td>1</td><td>0</td><td>2</td><td>no</td></tr>
       <tr><td>E6</td><td><code>efficientnet_b0</code></td><td>yes</td><td>64</td><td>5</td><td>0.0003</td><td>1</td><td>0</td><td>2</td><td>yes</td></tr>
+      <tr><td>E7</td><td><code>efficientnet_b0</code></td><td>yes</td><td>64</td><td>5</td><td>0.0003</td><td>1</td><td>0</td><td>2</td><td>no</td></tr>
     </tbody>
   </table>
   </div>
@@ -784,7 +858,8 @@ h3{
   backbone learns 10× slower (E1 has no pretrained part). Warm-up = epochs in which the learning rate rises slowly from 0.
   Frozen epochs = epochs in which the backbone does not learn (E2: the whole run). Early stop = training stops if the
   validation loss has not improved for this many epochs in a row; the best epoch is kept. All experiments use seed 42,
-  AdamW, dropout 0.2, 224×224 images and mixed precision on a GPU.</p>
+  AdamW, dropout 0.2, 224×224 images and mixed precision on a GPU. E7 has no file of its own: it is
+  <code>03_effnet_finetune.yaml</code> with <code>data.train_subset</code> set to 1,000, 10,000 or 50,000 by notebook 05.</p>
 
   <footer>
     The notebook scores models on the validation split while you choose settings; the test split is used once, at the
